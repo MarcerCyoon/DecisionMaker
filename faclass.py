@@ -1,6 +1,29 @@
 import math
 import random
 
+def calcImportance(age):
+    # Don't know why I have to do this but I'm too lazy and don't want too many parantheses lol
+    # Determines the importance of rings and contention through a logistic function based on age.
+    # The higher the age, the more important winning matters.
+    # The importance of winning caps out at 85% and the low is 15%.
+    # The mid-point is 31, where your winning importance is at 55%.
+    # I've also added a noise variable so that the mid-point can be adjusted. Adds some realism.
+    noise = random.randint(-20, 20) / 10
+    huh = 1 + math.exp(-1 * (age) + (31 + noise))
+    ringImportance = (0.70 / huh) + 0.15
+
+    # Role Importance and Money Importance feel like they are closely correlated, so they take
+    # what's left of the pie after the winning importance.
+    # Role Importance is simply a third of the remainder while money importance is two-thirds.
+    roleImportance = (1 - ringImportance) / 3
+    moneyImportance = (1 - ringImportance) - roleImportance
+    
+    print("Ring Importance: {}".format(ringImportance))
+    print("Role Importance: {}".format(roleImportance))
+    print("Money Importance: {}".format(moneyImportance))
+
+    return (ringImportance, roleImportance, moneyImportance)
+
 class Player:
     def __init__(self, name, age, askingAmount, isrfa):
         self._name = name
@@ -11,6 +34,8 @@ class Player:
         
         # Whether the player is an RFA or not
         self._isrfa = isrfa
+
+        self._ringImportance, self._roleImportance, self._moneyImportance = calcImportance(self._age)
     
     @property
     def name(self):
@@ -29,26 +54,6 @@ class Player:
         return self._isrfa
     
     def returnInterest(self, teamOffer):
-        # Don't know why I have to do this but I'm too lazy and don't want too many parantheses lol
-        # Determines the importance of rings and contention through a logistic function based on age.
-        # The higher the age, the more important winning matters.
-        # The importance of winning caps out at 85% and the low is 15%.
-        # The mid-point is 31, where your winning importance is at 55%.
-        # I've also added a noise variable so that the mid-point can be adjusted. Adds some realism.
-        noise = random.randrange(-2, 2.2, 0.2)
-        huh = 1 + math.exp(-1 * (self._age) + (31 + noise))
-        ringImportance = (0.70 / huh) + 0.15
-
-        # Role Importance and Money Importance feel like they are closely correlated, so they take
-        # what's left of the pie after the winning importance.
-        # Role Importance is simply a third of the remainder while money importance is two-thirds.
-        roleImportance = (1 - ringImportance) / 3
-        moneyImportance = (1 - ringImportance) - roleImportance
-        
-        print("Ring Importance: {}".format(ringImportance))
-        print("Role Importance: {}".format(roleImportance))
-        print("Money Importance: {}".format(moneyImportance))
-        
         # Contract Interest calculation is a bit wonky.
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
@@ -111,7 +116,7 @@ class Player:
         print("Role Interest: {}".format(roleInterest))
         
         # Final interest is a weighted average of the three interests.
-        interest = int((contractInterest * moneyImportance) + (strengthInterest * ringImportance) + (roleInterest * roleImportance))
+        interest = int((contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-5, 5)
