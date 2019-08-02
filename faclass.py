@@ -31,12 +31,13 @@ class Player:
     def returnInterest(self, teamOffer):
         # Don't know why I have to do this but I'm too lazy and don't want too many parantheses lol
         # Determines the importance of rings and contention through a logistic function based on age.
-        # The higher the age, the more important winning in general matters.
-        # The importance of winning caps out a 85% and the low is 15%.
+        # The higher the age, the more important winning matters.
+        # The importance of winning caps out at 85% and the low is 15%.
         # The mid-point is 31, where your winning importance is at 55%.
-        huh = 1 + math.exp(-1 * (self._age) + 31)
+        # I've also added a noise variable so that the mid-point can be adjusted. Adds some realism.
+        noise = random.randrange(-2, 2.2, 0.2)
+        huh = 1 + math.exp(-1 * (self._age) + (31 + noise))
         ringImportance = (0.70 / huh) + 0.15
-
 
         # Role Importance and Money Importance feel like they are closely correlated, so they take
         # what's left of the pie after the winning importance.
@@ -48,13 +49,11 @@ class Player:
         print("Role Importance: {}".format(roleImportance))
         print("Money Importance: {}".format(moneyImportance))
         
-
         # Contract Interest calculation is a bit wonky.
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
         stddev = self._askingAmount / 3
         stddev2 = self._askingAmount / 5
-
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
         # the contract interest will be equal to a 100.
@@ -105,7 +104,6 @@ class Player:
         
         print("Strength Interest: {}".format(strengthInterest))
         
-
         # Role Interest is a linear function using the role value of the player. See details about that
         # in the constructor for teamOffer.
         roleInterest = 25 * teamOffer.role
@@ -124,7 +122,6 @@ class Player:
         
         return interest
         
-
 class teamOffer:
     def __init__(self, teamName, offerAmount, powerRank, capSpace, role):
         # Team Name

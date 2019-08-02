@@ -1,9 +1,9 @@
 import random
 
 def willResign(resignInterest):
-    check = random.randint(1, 100)
-
     # Re-sign algorithm is literally a d100 roll, compared to the final interest.
+
+    check = random.randint(1, 100)
 
     print("d100: {}".format(check))
     print("Final Interest: {}".format(resignInterest))
@@ -15,14 +15,14 @@ def willResign(resignInterest):
         return False
 
 def makeDecision(interests):
-	# Open FA / mid-season FA decisions are made through a kind of average system.
-	# In essence, each team's interest are added up to create a sum.
-	# Then, each team's interest percentage is calculated by dividing the interest from the sum.
-	# This calculates how the player feels about each team, relatively.
-	# For example, a 100 interest offer is appealing, but if you have multiple 100 interest offers,
-	# the player views them all equally.
-	# After this percentage calculation, a d100 is rolled.
-	# Whichever percent bracket the d100 falls into is the ultimate winner.
+    # Open FA / mid-season FA decisions are made through a kind of average system.
+    # In essence, each team's interest are added up to create a sum.
+    # Then, each team's interest percentage is calculated by dividing the interest from the sum.
+    # This calculates how the player feels about each team, relatively.
+    # For example, a 100 interest offer is appealing, but if you have multiple 100 interest offers,
+    # the player views them all equally.
+    # After this percentage calculation, a d100 is rolled.
+    # Whichever percent bracket the d100 falls into is the ultimate winner.
 
     num = len(interests)
     tot = 0
@@ -50,5 +50,5 @@ def makeDecision(interests):
             
             add += percents[i]
     
-    # Fail-Safe: if this function returned -1, something is terribly wrong.
+    # Fail-Safe: if this function returned -1, something went terribly wrong.
     return -1

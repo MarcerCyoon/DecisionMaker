@@ -93,4 +93,4 @@ else:
 
         print("Final Decision: {} will sign with the {}".format(player.name, decisionTeam))
 
-input('Press ENTER to exit')
+input("Press ENTER to exit")
