@@ -32,10 +32,9 @@ def makeDecision(interests):
     
     for i in range(0, num):
         tot += interests[i]
-        
+
     for i in range(0, num):
-        percents.append(interests[i] / (tot * 100))
-        
+        percents.append((interests[i] / (tot)) * 100)
     
     check = random.randint(1, 100)
     
