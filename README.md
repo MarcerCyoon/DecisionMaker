@@ -1,7 +1,7 @@
 # DecisionMakerSLR
 A decision-making algorithm for NBASLR, a BBGM NBA simulation league.
 
-Currently, this algorithm is on version 2.0.0.
+Currently, this algorithm is on version 2.1.0.
 
 To run the program, download all the files in a folder then run
 "decisionmaker.py", the main file for the algorithm.
