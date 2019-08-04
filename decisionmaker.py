@@ -91,6 +91,7 @@ else:
 
         while True:
             decisionAns = decisions.makeDecision(interests)
+            print("Choice: {}; time to check".format(offers[decisionAns].teamName))
             if (decisions.willSign(interests[decisionAns])):
                 break
 

@@ -37,21 +37,19 @@ def makeDecision(interests):
         percents.append(interests[i] / (tot * 100))
         
     
-    while True:
-        check = random.randint(1, 100)
-        
-        if (check < percents[0]):
-            if (willSign(interests[0])):
-                return 0
-        else:
-            add = percents[0]
-            for i in range(1, num):
-                bracket = add + percents[i]
-                
-                if (check < bracket):
-                    return i
-                
-                add += percents[i]
-        
-        # Fail-Safe: if this function returned -1, something went terribly wrong.
-        return -1
+    check = random.randint(1, 100)
+    
+    if (check < percents[0]):
+        return 0
+    else:
+        add = percents[0]
+        for i in range(1, num):
+            bracket = add + percents[i]
+            
+            if (check < bracket):
+                return i
+            
+            add += percents[i]
+    
+    # Fail-Safe: if this function returned -1, something went terribly wrong.
+    return -1
