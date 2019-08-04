@@ -1,22 +1,25 @@
 import math
 import random
 
-def calcImportance(age):
-    # Don't know why I have to do this but I'm too lazy and don't want too many parantheses lol
-    # Determines the importance of rings and contention through a logistic function based on age.
-    # The higher the age, the more important winning matters.
-    # The importance of winning caps out at 85% and the low is 15%.
-    # The mid-point is 31, where your winning importance is at 55%.
-    # I've also added a noise variable so that the mid-point can be adjusted. Adds some realism.
-    noise = random.randint(-20, 20) / 10
-    huh = 1 + math.exp(-1 * (age) + (31 + noise))
-    ringImportance = (0.70 / huh) + 0.15
+# Subroutines – also makes things look nice and easy to find.
 
-    # Role Importance and Money Importance feel like they are closely correlated, so they take
-    # what's left of the pie after the winning importance.
-    # Role Importance is simply a third of the remainder while money importance is two-thirds.
-    roleImportance = (1 - ringImportance) / 3
-    moneyImportance = (1 - ringImportance) - roleImportance
+def get_moneyImportance(age, ovr):
+    rnd = random.uniform(-.15, .15)
+    return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
+
+def get_roleImportance(age, ovr):
+    rnd = random.uniform(-.15, .15)
+    return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
+
+def get_ringImportance(age):
+    rnd = random.uniform(-.1, .1)
+    return (.0192308 * age) - .146154 + rnd
+
+
+def calcImportance(age, ovr):
+    moneyImportance = get_moneyImportance(age, ovr)
+    roleImportance = get_roleImportance(age, ovr)
+    ringImportance = get_ringImportance(age)
     
     print("Ring Importance: {}".format(ringImportance))
     print("Role Importance: {}".format(roleImportance))
@@ -25,9 +28,12 @@ def calcImportance(age):
     return (ringImportance, roleImportance, moneyImportance)
 
 class Player:
-    def __init__(self, name, age, askingAmount, isrfa):
+    def __init__(self, name, age, ovr, askingAmount, isrfa):
         self._name = name
         self._age = age
+
+        # OVR Rating in BBGM
+        self._ovr = ovr
         
         # Asking Amount, in Millions
         self._askingAmount = askingAmount
@@ -35,7 +41,7 @@ class Player:
         # Whether the player is an RFA or not
         self._isrfa = isrfa
 
-        self._ringImportance, self._roleImportance, self._moneyImportance = calcImportance(self._age)
+        self._ringImportance, self._roleImportance, self._moneyImportance = calcImportance(self._age, self._ovr)
     
     @property
     def name(self):
@@ -44,6 +50,10 @@ class Player:
     @property
     def age(self):
         return self._age
+
+    @property
+    def ovr(self):
+        return self._ovr
     
     @property
     def askingAmount(self):
@@ -116,7 +126,8 @@ class Player:
         print("Role Interest: {}".format(roleInterest))
         
         # Final interest is a weighted average of the three interests.
-        interest = int((contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance))
+        sigma = (contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance)
+        interest = int(sigma / (self._ringImportance + self._moneyImportance + self._roleImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-5, 5)

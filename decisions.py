@@ -1,7 +1,8 @@
 import random
 
-def willResign(resignInterest):
-    # Re-sign algorithm is literally a d100 roll, compared to the final interest.
+def willSign(resignInterest):
+    # Sign algorithm is literally a d100 roll, compared to the final interest.
+    # Used for both re-signs and to lower randomness in open FA.
 
     check = random.randint(1, 100)
 
@@ -32,23 +33,25 @@ def makeDecision(interests):
     for i in range(0, num):
         tot += interests[i]
         
-        
     for i in range(0, num):
         percents.append(interests[i] / (tot * 100))
         
-    check = random.randint(1, 100)
     
-    if (check < percents[0]):
-        return 0
-    else:
-        add = percents[0]
-        for i in range(1, num):
-            bracket = add + percents[i]
-            
-            if (check < bracket):
-                return i
-            
-            add += percents[i]
-    
-    # Fail-Safe: if this function returned -1, something went terribly wrong.
-    return -1
+    while True:
+        check = random.randint(1, 100)
+        
+        if (check < percents[0]):
+            if (willSign(interests[0])):
+                return 0
+        else:
+            add = percents[0]
+            for i in range(1, num):
+                bracket = add + percents[i]
+                
+                if (check < bracket):
+                    return i
+                
+                add += percents[i]
+        
+        # Fail-Safe: if this function returned -1, something went terribly wrong.
+        return -1

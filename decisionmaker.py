@@ -18,7 +18,7 @@ if int(auto):
     df = df.dropna()
 
     for i in range(0, len(df)):
-        player = Player(df['Player'].iloc[i], df['Age'].iloc[i], df['askingAmount'].iloc[i], df['isRFA'].iloc[i])
+        player = Player(df['Player'].iloc[i], df['Age'].iloc[i], df['OVR'].iloc[i], df['askingAmount'].iloc[i], df['isRFA'].iloc[i])
         resignOffer = teamOffer(df['Prev Team'].iloc[i], df['resignOffer'].iloc[i], df['powerRank'].iloc[i], df['capSpace'].iloc[i], df['role'].iloc[i])
         
         interest = player.returnInterest(resignOffer)
@@ -27,7 +27,7 @@ if int(auto):
             # RFA Penalty — RFAs are more likely to test the open market.
             resignInterest -= 20
         
-        decision = willResign(interest)
+        decision = willSign(interest)
         
         if decision:
             print("{} has decided to re-sign with the {}.".format(player.name, resignOffer.teamName))
@@ -38,10 +38,11 @@ if int(auto):
 else:
     name = input("Input name: ")
     age = input("Input age: ")
+    ovr = input("Input overall in BBGM: ")
     ask = input("Input asking amount (in millions): ")
     isrfa = input("If this player is a UFA, type 0. If this player is an RFA, type 1: ")
 
-    player = Player(name, int(age), float(ask), isrfa)
+    player = Player(name, int(age), int(ovr), float(ask), int(isrfa))
 
     situation = input("If you are evaluating a re-sign situation, type 1. If this is an Open FA situation, type 2: ")
 
@@ -60,7 +61,7 @@ else:
             # RFA Penalty — RFAs are more likely to test the open market.
             resignInterest -= 20
         
-        resign = decisions.willResign(resignInterest)
+        resign = decisions.willSign(resignInterest)
         
         if (resign):
             print("{} will re-sign with the {}.".format(player.name, bid.teamName))
@@ -88,8 +89,12 @@ else:
         for i in range(0, int(run)):
             interests.append(player.returnInterest(offers[i]))
 
+        while True:
+            decisionAns = decisions.makeDecision(interests)
+            if (decisions.willSign(interests[decisionAns])):
+                break
 
-        decisionTeam = offers[decisions.makeDecision(interests)].teamName
+        decisionTeam = offers[decisionAns].teamName
 
         print("Final Decision: {} will sign with the {}".format(player.name, decisionTeam))
 
