@@ -1,0 +1,4 @@
+# CSV files and __pycache__ are ignored, the usual.
+
+*.csv
+/__pycache__

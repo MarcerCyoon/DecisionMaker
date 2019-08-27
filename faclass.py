@@ -67,7 +67,7 @@ class Player:
         # Contract Interest calculation is a bit wonky.
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
-        stddev = self._askingAmount / 3
+        stddev = self._askingAmount / 2
         stddev2 = self._askingAmount / 5
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
@@ -133,8 +133,6 @@ class Player:
         fuzz = random.randint(-5, 5)
 
         interest += fuzz
-
-        print("Final Interest: {}".format(interest))
         
         return interest
         
@@ -149,11 +147,8 @@ class teamOffer:
         # The Power Ranking of the Team (out of 30)
         self._powerRank = powerRank
         
-        # Team's Cap Space (including player's contract if they sign)
-        if (capSpace - offerAmount < 0):
-        	self._capSpace = 0
-        else:
-        	self._capSpace = capSpace - offerAmount
+        # Team's Cap Space
+        self._capSpace = capSpace
         
         # The Role the Player will have on the team. (0 — Cap Room, 1 — Expendable, 2 — Bench, 3 — Starter, 4 - Star)
         self._role = role

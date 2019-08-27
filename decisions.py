@@ -1,15 +1,15 @@
 import random
 
-def willSign(resignInterest):
+def willSign(signInterest):
     # Sign algorithm is literally a d100 roll, compared to the final interest.
     # Used for both re-signs and to lower randomness in open FA.
 
     check = random.randint(1, 100)
 
     print("d100: {}".format(check))
-    print("Final Interest: {}".format(resignInterest))
+    print("Final Interest: {}".format(signInterest))
     
-    if (check <= resignInterest):
+    if (check <= signInterest):
         return True
     
     else:
