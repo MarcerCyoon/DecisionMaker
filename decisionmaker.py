@@ -10,7 +10,7 @@ import decisions
 MIN_SALARY = .9
 HARD_CAP = 142
 
-def capSpace(payroll):
+def calc_capSpace(payroll):
 	return max(0, 109 - payroll)
 
 
@@ -150,7 +150,7 @@ if int(auto):
 
 			if int(row[5]) == 1:
 				row = next(reader)
-				bid = teamOffer(row[0], float(row[1]), int(row[2]), capSpace(float(row[3])), int(row[4]))
+				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]))
 				
 
 				if int(check_validity(player, bid, int(isResign))):
@@ -172,7 +172,7 @@ if int(auto):
 				interests = []
 				for i in range(int(row[5])):
 					row = next(reader)
-					bid = teamOffer(row[0], float(row[1]), int(row[2]), capSpace(float(row[3])), int(row[4]))
+					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]))
 
 					if int(check_validity(player, bid, int(isResign))):
 						offers.append(bid)
@@ -213,7 +213,7 @@ else:
 		capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 		role = input("Input Role of the player in the team (0-4): ")
 
-		bid = teamOffer(teamName, float(offer), int(power), float(capSpace), int(role))
+		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role))
 		isResign = True
 
 		if int(check_validity(player, bid, isResign)):
@@ -232,7 +232,7 @@ else:
 
 
 	else:
-		run = input("How many contracts being offered to this player? ")
+		run = input("Number of contracts being offered to this player: ")
 
 		offers = []
 		interests = []
@@ -244,9 +244,9 @@ else:
 			capSpace = input("Input Team Cap Space (excluding player being offered's contract): ")
 			role = input("Input Role of the player in the team (0-4): ")
 
-			bid = teamOffer(teamName, float(offer), int(power), float(capSpace), int(role))
+			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role))
 			
-			if int(check_validity(player, bid, int(isResign))):
+			if int(check_validity(player, bid, 0)):
 				offers.append(bid)
 				interests.append(player.returnInterest(bid))
 

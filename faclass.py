@@ -93,14 +93,14 @@ class Player:
         print("Contract Interest: {}".format(contractInterest))
 
         # Power Tier of 1 means you're in the Top 5, Power Tier of 6 mean's you're in the Bottom 5.
-        powerTier = int(math.ceil(int(teamOffer.powerRank / 5)))
+        powerTier = int(math.ceil(teamOffer.powerRank / 5))
 
         print("Power Tier: {}".format(powerTier))
 
         # If you have 30M+ in cap space after signing the guy, you get a -2 bonus.
         # If you have 15M+ in cap space after signing the guy, you get a -1 bonus.
         # Otherwise, 0.
-        capTier = int(math.floor(int(teamOffer.capSpace / 15)))
+        capTier = min(2, int(math.floor(teamOffer.capSpace / 15)))
 
         print("Cap Tier: {}".format(capTier))
 
