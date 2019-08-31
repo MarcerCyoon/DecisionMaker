@@ -13,7 +13,6 @@ HARD_CAP = 142
 def calc_capSpace(payroll):
 	return max(0, 109 - payroll)
 
-
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
 	if payroll <= 109:
@@ -221,7 +220,7 @@ else:
 
 			if (player.isrfa):
 				print("Player is RFA. Reducing interest.")
-				interest -= 15
+				interest -= 20
 
 			resign = decisions.willSign(interest - 5)
 

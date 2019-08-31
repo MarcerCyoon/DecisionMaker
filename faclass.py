@@ -100,7 +100,14 @@ class Player:
         # If you have 30M+ in cap space after signing the guy, you get a -2 bonus.
         # If you have 15M+ in cap space after signing the guy, you get a -1 bonus.
         # Otherwise, 0.
-        capTier = min(2, int(math.floor(teamOffer.capSpace / 15)))
+
+        print("Cap Space: {}, Offer Amount: {}".format(teamOffer.capSpace, teamOffer.offerAmount))
+        
+        realCapSpace = max(0, teamOffer.capSpace - teamOffer.offerAmount)
+
+        print("Real Cap Space: {}".format(realCapSpace))
+
+        capTier = min(2, int(math.floor(realCapSpace / 15)))
 
         print("Cap Tier: {}".format(capTier))
 
