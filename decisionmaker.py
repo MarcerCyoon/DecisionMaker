@@ -25,95 +25,16 @@ def MLE_amount(payroll):
 		print("Team is hard capped!")
 		return 0
 
-def calculate_minimum_salary(age, ovr):
-	# Honestly, you could probably use enums or more likely a matrix for this — but for now,
-	# we'll push as is.
-
-	min_offer = 0
-	if age <= 25:
-		if ovr >= 75:
-			min_offer = 35.3
-		elif ovr >= 70:
-			min_offer = 23.5
-		elif ovr >= 65:
-			min_offer = 11.8
-		elif ovr >= 60:
-			min_offer = 5.5
-		else:
-			min_offer = MIN_SALARY
-	elif age <= 29:
-		if ovr >= 80:
-			min_offer = 35.3
-		elif ovr >= 75:
-			min_offer = 29.4
-		elif ovr >= 70:
-			min_offer = 23.5
-		elif ovr >= 65:
-			min_offer = 11.8
-		elif ovr >= 60:
-			min_offer = 5.5
-		else:
-			min_offer = MIN_SALARY
-	elif age <= 35:
-		if ovr >= 80:
-			min_offer = 29.4
-		elif ovr >= 75:
-			min_offer = 23.5
-		elif ovr >= 70:
-			min_offer = 14.7
-		elif ovr >= 65:
-			min_offer = 5.5
-		elif ovr >= 60:
-			min_offer = 2.9
-		else:
-			min_offer = MIN_SALARY
-	else:
-		if ovr >= 80:
-			min_offer = 17.6
-		elif ovr >= 75:
-			min_offer = 8.8
-		elif ovr >= 70:
-			min_offer = 5.5
-		else:
-			min_offer = MIN_SALARY
-	return min_offer
-
 def check_hardCap(bid):
 	if (bid.offerAmount + bid.capSpace <= HARD_CAP):
 		return True
 	else:
 		return False
 
-def check_tiers(age, ovr, offer, powerrank, name):
-	min_offer = calculate_minimum_salary(age, ovr)
-	if offer >= min_offer:
-		return 1
-	# check ring-chasers clause
-	elif age >= 30 and powerrank <= 6:
-		rings = input("Enter the number of rings that {} has won:".format(name))
-		# eligible for the ring-chasers clause
-		if int(rings) < 2:
-			ovr = ovr - 5
-			min_offer = calculate_minimum_salary(age, ovr)
-			if offer >= min_offer:
-				return 1
-			else:
-				return 0
-		# ineligible for the ring-chasers clause
-		else:
-			return 0
-	# otherwise the offer wasn't high enough
-	else:
-		return 0
-
 # Function that checks if an offer to a player follows:
 # 1. The FA tiers,
 # and 2. the salary cap rules.
 def check_validity(player, bid, isResign):
-	if not check_tiers(player.age, player.ovr, bid.offerAmount, bid.powerRank, player.name):
-		print("The {}'s offer for {} is too low, and thus violates the FA Tier rules.".format(bid.teamName, player.name))
-		return 0
-
 	if not check_hardCap(bid):
 		return 0
 
