@@ -4,28 +4,33 @@ import random
 # Subroutines – also makes things look nice and easy to find.
 
 def get_moneyImportance(age, ovr):
-    rnd = random.uniform(-.15, .15)
+    rnd = random.uniform(-.1, .1)
     return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
 
 def get_roleImportance(age, ovr):
-    rnd = random.uniform(-.15, .15)
+    rnd = random.uniform(-.1, .1)
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
 
 def get_ringImportance(age):
     rnd = random.uniform(-.1, .1)
     return (.0192308 * age) - .146154 + rnd
 
+def get_facilityImportance():
+    rnd = random.uniform(-.05, .05)
+    return 0.25 + rnd
 
 def calcImportance(age, ovr):
     moneyImportance = get_moneyImportance(age, ovr)
     roleImportance = get_roleImportance(age, ovr)
     ringImportance = get_ringImportance(age)
+    facilityImportance = get_facilityImportance()
     
     print("Ring Importance: {}".format(ringImportance))
     print("Role Importance: {}".format(roleImportance))
     print("Money Importance: {}".format(moneyImportance))
+    print("Facility Importance: {}".format(facilityImportance))
 
-    return (ringImportance, roleImportance, moneyImportance)
+    return (ringImportance, roleImportance, moneyImportance, facilityImportance)
 
 class Player:
     def __init__(self, name, age, ovr, askingAmount, isrfa):
@@ -41,7 +46,7 @@ class Player:
         # Whether the player is an RFA or not
         self._isrfa = isrfa
 
-        self._ringImportance, self._roleImportance, self._moneyImportance = calcImportance(self._age, self._ovr)
+        self._ringImportance, self._roleImportance, self._moneyImportance, self._facilityImportance = calcImportance(self._age, self._ovr)
     
     @property
     def name(self):
@@ -92,37 +97,15 @@ class Player:
         
         print("Contract Interest: {}".format(contractInterest))
 
-        # Power Tier of 1 means you're in the Top 5, Power Tier of 6 mean's you're in the Bottom 5.
-        powerTier = int(math.ceil(teamOffer.powerRank / 5))
+        # Flip Power Ranking such that a better power ranking has a higher number; for example,
+        # if you are #1 in PR your powerScore should be 30.
+        powerScore = 31 - teamOffer.powerRank
 
-        print("Power Tier: {}".format(powerTier))
-
-        # If you have 30M+ in cap space after signing the guy, you get a -2 bonus.
-        # If you have 15M+ in cap space after signing the guy, you get a -1 bonus.
-        # Otherwise, 0.
-
-        print("Cap Space: {}, Offer Amount: {}".format(teamOffer.capSpace, teamOffer.offerAmount))
-        
-        realCapSpace = max(0, teamOffer.capSpace - teamOffer.offerAmount)
-
-        print("Real Cap Space: {}".format(realCapSpace))
-
-        capTier = min(2, int(math.floor(realCapSpace / 15)))
-
-        print("Cap Tier: {}".format(capTier))
-
-        finalTier = powerTier - capTier
-
-        print("Final Tier: {}".format(finalTier))
-
-        # If there are any shenanigans involving having too high/low a tier, this checks for it.
-        if (finalTier > 6):
-            finalTier = 6
-        elif (finalTier < 1):
-            finalTier = 1
-        
-        # Strength Interest is ultimately calculated linearly.
-        strengthInterest = 120 - (20 * finalTier)
+        # Strength Interest is calculated as a function with an exponent a such that 30^a / 2 = 100.
+        # This graph grows slightly more exponentially than if 30^a = 100, which makes sense
+        # as really any NBA team that is bottom 15 is about equal, and there is a rapid increase
+        # as we start to hit contenders.
+        strengthInterest = (powerScore ** 1.55778003215) / 2
         
         print("Strength Interest: {}".format(strengthInterest))
         
@@ -131,10 +114,18 @@ class Player:
         roleInterest = 25 * teamOffer.role
         
         print("Role Interest: {}".format(roleInterest))
+
+        # facilityScore rationale same as powerScore rationale.
+        facilityScore = 31 - teamOffer.facility
+
+        # Facility Interest is calculated as a power function where the exponent is such that 30^a = 100. (shoutouts to Desmos)
+        facilityInterest = facilityScore ** 1.353984985
+
+        print("Facility Interest: {}".format(facilityInterest))
         
         # Final interest is a weighted average of the three interests.
-        sigma = (contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance)
-        interest = int(sigma / (self._ringImportance + self._moneyImportance + self._roleImportance))
+        sigma = (contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance) + (facilityInterest * self._facilityImportance)
+        interest = int(sigma / (self._ringImportance + self._moneyImportance + self._roleImportance + self._facilityImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-5, 5)
@@ -144,7 +135,7 @@ class Player:
         return interest
         
 class teamOffer:
-    def __init__(self, teamName, offerAmount, powerRank, capSpace, role):
+    def __init__(self, teamName, offerAmount, powerRank, capSpace, role, facility):
         # Team Name
         self._teamName = teamName
         
@@ -159,6 +150,9 @@ class teamOffer:
         
         # The Role the Player will have on the team. (0 — Cap Room, 1 — Expendable, 2 — Bench, 3 — Starter, 4 - Star)
         self._role = role
+
+        # The Facilities Rank of the Team
+        self._facility = facility
         
     @property
     def teamName(self):
@@ -179,4 +173,9 @@ class teamOffer:
     @property
     def role(self):
         return self._role  
+
+    @property
+    def facility(self):
+        return self._facility
+    
         
