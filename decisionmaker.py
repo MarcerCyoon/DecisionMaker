@@ -31,15 +31,13 @@ def check_hardCap(bid):
 	else:
 		return False
 
-# Function that checks if an offer to a player follows:
-# 1. The FA tiers,
-# and 2. the salary cap rules.
-def check_validity(player, bid, isResign):
+# Function that checks if an offer is valid with salary cap rules.
+def check_validity(player, bid, isResign, isMLE):
 	if not check_hardCap(bid):
 		return 0
 
 	if (not isResign):
-		if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (int(row[5]) == 1 and bid.offerAmount <= MLE_amount(float(row[3]))):
+		if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(float(row[3]))):
 			return 1
 		else:
 			print("The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name))
@@ -73,7 +71,7 @@ if int(auto):
 				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]))
 				
 
-				if int(check_validity(player, bid, int(isResign))):
+				if int(check_validity(player, bid, int(isResign), int(row[5]))):
 					interest = player.returnInterest(bid)
 
 					if (player.isrfa):
@@ -94,7 +92,7 @@ if int(auto):
 					row = next(reader)
 					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]))
 
-					if int(check_validity(player, bid, int(isResign))):
+					if int(check_validity(player, bid, int(isResign), int(row[5]))):
 						offers.append(bid)
 						interests.append(player.returnInterest(bid))
 
@@ -136,7 +134,7 @@ else:
 		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role))
 		isResign = True
 
-		if int(check_validity(player, bid, isResign)):
+		if int(check_validity(player, bid, isResign, 1)):
 			interest = player.returnInterest(bid)
 
 			if (player.isrfa):
@@ -166,7 +164,7 @@ else:
 
 			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role))
 			
-			if int(check_validity(player, bid, 0)):
+			if int(check_validity(player, bid, 0, 1)):
 				offers.append(bid)
 				interests.append(player.returnInterest(bid))
 
