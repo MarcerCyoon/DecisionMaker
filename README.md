@@ -1,7 +1,7 @@
 # DecisionMakerSLR
 A decision-making algorithm for NBASLR, a BBGM NBA simulation league.
 
-Currently, this algorithm is on version 3.0.1.
+Currently, this algorithm is on version 4.0.0.
 
 To run the program, download all the files in a folder then run
 "decisionmaker.py", the main file for the algorithm.
@@ -25,8 +25,8 @@ isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1).
 
 The next line holds the player information (name, age, OVR, askingAmount, isRFA, and # of contracts).
 
-The next few lines holds all the contracts that player has received (the team, offer, power ranking, payroll, player role, and 
-whether the offer uses MLE or not.)
+The next few lines holds all the contracts that player has received (the team, offer, power ranking, payroll, player role, 
+whether the offer uses MLE or not, and facilities rank.)
 
 Once you write out each offer in each line, move onto to the next player, and their contracts, and so on and so forth.
 
@@ -35,9 +35,6 @@ Making a spreadsheet as FA goes will drastically reduce the time required for in
 Remember to also place the final .csv in the same directory as 'decisionmaker.py'.
 
 ### TODO:
-
-The generation of interest might need to be touched, and less linear relationships 
-must be used.
 
 The open FA decision algorithm may need to be modified to be less random.
 
