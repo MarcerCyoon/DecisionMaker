@@ -89,11 +89,6 @@ class Player:
         # Contract Interest is ultimately calculated linearly.
         # Might change this.
         contractInterest = (interestVar / comp) * 100
-
-        if (contractInterest < 0):
-            contractInterest = 0
-        elif (contractInterest > 100):
-            contractInterest = 100
         
         print("Contract Interest: {}".format(contractInterest))
 
