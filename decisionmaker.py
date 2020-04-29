@@ -7,7 +7,10 @@ from faclass import Player
 from faclass import teamOffer
 import decisions
 
-MIN_SALARY = .9
+MIN_SALARY = 0.9
+MAX_SALARY = 35.3
+SOFT_CAP = 109
+APRON_CAP = 130
 HARD_CAP = 142
 
 def calc_capSpace(payroll):
@@ -15,36 +18,38 @@ def calc_capSpace(payroll):
 
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
-	if payroll <= 109:
-		return float(0)
-	elif payroll <= 130:
-		return 9.5
-	elif payroll < 142:
-		return min(5.5, 142 - payroll)
-	else:
-		print("Team is hard capped!")
-		return 0
+    if payroll <= SOFT_CAP:
+        return 0.0
+    elif payroll <= APRON_CAP:
+        return 9.5
+    elif payroll < HARD_CAP:
+        return min(5.5, HARD_CAP - payroll)
+    else:
+        print("Team is hard capped!")
+        return 0
 
 def check_hardCap(bid):
-	if (bid.offerAmount + bid.capSpace <= HARD_CAP):
+	if bid.offerAmount + bid.capSpace <= HARD_CAP:
 		return True
 	else:
 		return False
 
 # Function that checks if an offer is valid with salary cap rules.
 def check_validity(player, bid, isResign, isMLE):
-	if not check_hardCap(bid):
-		return 0
+    if bid.offerAmount > MAX_SALARY:
+        return 0
 
-	if (not isResign):
-		if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(float(row[3]))):
-			return 1
-		else:
-			print("The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name))
-			return 0
-	else:
-		return 1
+    if not check_hardCap(bid):
+        return 0
 
+    if not isResign:
+        if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(float(row[3]))):
+            return 1
+        else:
+            print("The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name))
+            return 0
+    else:
+        return 1
 auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1: ")
 
 if int(auto):
@@ -69,11 +74,10 @@ if int(auto):
 				row = next(reader)
 				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]))
 				
-
 				if int(check_validity(player, bid, int(isResign), int(row[5]))):
 					interest = player.returnInterest(bid)
 
-					if (player.isrfa):
+					if player.isrfa:
 						print("Player is RFA. Reducing interest.")
 						interest -= 15
 
@@ -139,7 +143,7 @@ else:
 
 			if (player.isrfa):
 				print("Player is RFA. Reducing interest.")
-				interest -= 20
+				interest -= 15
 
 			resign = decisions.willSign(interest - 5)
 
