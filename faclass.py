@@ -77,7 +77,7 @@ class Player:
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
         # the contract interest will be equal to a 100.
-        # On the other hand, the low offer is set to the askingAmount - a third of the askingAmount. If you
+        # On the other hand, the low offer is set to the askingAmount - half of the askingAmount. If you
         # offer the low, the contract interest will be equal to 0.
         # If you go lower than the low it defaults to 0; if you go higher than the high it defaults to 100.
         low = self._askingAmount - stddev
