@@ -1,4 +1,5 @@
-# CSV files and __pycache__ are ignored, the usual.
+# CSV files, .txt files, and __pycache__ are ignored, the usual.
 
 *.csv
 /__pycache__
+*.txt

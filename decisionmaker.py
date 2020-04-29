@@ -50,9 +50,13 @@ def check_validity(player, bid, isResign, isMLE):
             return 0
     else:
         return 1
+
 auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1: ")
 
 if int(auto):
+
+	# Resets the list.txt file
+	open("list.txt", "w").close()
 
 	name = input("What is the name of the csv file? Include the .csv: ")
 
@@ -84,9 +88,14 @@ if int(auto):
 					resign = decisions.willSign(interest - 5)
 
 					if (resign):
-						print("{} will sign with the {}.\n\n".format(player.name, bid.teamName))
+						result = "{} will sign with the {}.\n\n".format(player.name, bid.teamName)
 					else:
-						print("{} will not sign with the {}.\n\n".format(player.name, bid.teamName))
+						result = "{} will not sign with the {}.\n\n".format(player.name, bid.teamName)
+
+					print(result)
+
+					with open("list.txt", "a+") as file:
+						file.write(result)
 
 			else:
 				offers = []
@@ -107,11 +116,20 @@ if int(auto):
 
 						if (decisions.willSign(interests[decisionAns])):
 							decisionTeam = offers[decisionAns].teamName
-							print("Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam))
+							result = "Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam)
+							print(result)
+
+							with open("list.txt", "a+") as file:
+								file.write(result)
+
 							break
 
 						if (i == numCheck - 1):
-							print("Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name))
+							result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name)
+							print(result)
+
+							with open("list.txt", "a+") as file:
+								file.write(result)
 
 				else:
 					print("There were no valid offers for {}\n\n".format(player.name))
