@@ -128,7 +128,7 @@ if int(auto):
 							break
 
 						if (i == numCheck - 1):
-							result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name)
+							result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.\n\n".format(player.name)
 							print(result)
 
 							with open("list.txt", "a+") as file:
