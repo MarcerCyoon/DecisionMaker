@@ -23,9 +23,7 @@ def calc_capSpace(payroll):
 
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
-    if payroll <= SOFT_CAP:
-        return 0.0
-    elif payroll <= APRON_CAP:
+    if payroll <= APRON_CAP:
         return 9.5
     elif payroll < HARD_CAP:
         return min(5.5, HARD_CAP - payroll)
