@@ -18,7 +18,7 @@ def calc_capSpace(payroll):
 	# by ten to make them natural numbers, perform arithmetic, then divide the number by ten
 	# and return it as a decimal.
 	
-	fix = max(0, 1090 - payroll * 10)
+	fix = max(0, SOFT_CAP * 10 - payroll * 10)
 	return (fix / 10)
 
 # What follows is a bunch of subroutines for check_validity.
