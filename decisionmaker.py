@@ -14,7 +14,12 @@ APRON_CAP = 130
 HARD_CAP = 142
 
 def calc_capSpace(payroll):
-	return max(0, 109 - payroll)
+	# This multiply-by-ten fix is done to avoid floating point errors. Basically, we multiple
+	# by ten to make them natural numbers, perform arithmetic, then divide the number by ten
+	# and return it as a decimal.
+	
+	fix = max(0, 1090 - payroll * 10)
+	return (fix / 10)
 
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
@@ -88,9 +93,9 @@ if int(auto):
 					resign = decisions.willSign(interest - 5)
 
 					if (resign):
-						result = "{} will sign with the {}.\n\n".format(player.name, bid.teamName)
+						result = "Final Decision: {} will sign with the {}.\n\n".format(player.name, bid.teamName)
 					else:
-						result = "{} will not sign with the {}.\n\n".format(player.name, bid.teamName)
+						result = "Final Decision: {} will not sign with the {}.\n\n".format(player.name, bid.teamName)
 
 					print(result)
 
