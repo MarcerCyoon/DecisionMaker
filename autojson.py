@@ -100,7 +100,7 @@ def create_playerLine(player, numContracts, currentYear, writer):
 	writer.writerow(line)
 
 def create_teamLine(row, teamData, teamPower, writer):
-	teamName = row[0]
+	teamName = row[0].strip()
 	offerAmount = row[2]
 	powerRank = teamPower[4]
 	payroll = teamPower[3] # fix to account for released player cap hits
