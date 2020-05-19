@@ -142,6 +142,7 @@ if int(auto) == 2:
 	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
 	decisionArr = csvToDecisions(isResign, name="generated.csv")
 
+	autojson.updateExport(isResign, decisionArr)
 
 elif int(auto) == 1:
 	name = input("What is the name of the csv file? Include the .csv: ")

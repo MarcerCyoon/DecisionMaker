@@ -3,6 +3,63 @@ import csv
 import math
 import collections
 
+
+with open("export.json", "r", encoding='utf-8-sig') as file:
+		# Generate dictionary of each team and their tids
+		teamDict = dict()
+		for team in json.load(file)['teams']:
+				teamName = team['region'] + " " + team['name']
+				teamDict[teamName] = team['tid']
+
+
+def updateExport(isResign, decisionArr):
+	print(decisionArr)
+
+	with open("export.json", "r", encoding='utf-8-sig') as file:
+	    export = json.load(file)
+
+	text = export['meta']['phaseText']
+	currentYear = int(text.split(" ")[0])
+	phase = text.split(" ")[1]
+
+	for decision in decisionArr:
+		player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == decision[0], export['players']))[0]
+		tid = teamDict[decision[1]]
+		player['tid'] = tid
+		player['contract']['amount'] = decision[2] * 1000
+
+		if (phase == "regular" or phase == "preseason"):
+			exp = decision[3] + currentYear - 1
+			player['contract']['exp'] = exp
+		else:
+			exp = decision[3] + currentYear
+			player['contract']['exp'] = exp
+
+		event = dict()
+
+		code = export['teams'][tid]['abbrev']
+		labelName = decision[1].split(" ")[-1]
+		
+		if (not isResign):
+			event['type'] = 'reSigned'
+			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> re-signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], decision[2], exp)
+
+		else:
+			event['type'] = 'freeAgent'
+			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], decision[2], exp)
+		
+		event['pids'] = [player['pid']]
+		event['tids'] = [teamDict[decision[1]]]
+		event['season'] = currentYear
+		event['eid'] = len(export['events'])
+
+		export['events'].append(event)
+		print(event)
+
+	with open("updated.json", "w") as file:
+		json.dump(export, file)
+		print("New Export Created.")
+
 def playerExists(name, players):
 	try:
 		check = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
@@ -90,7 +147,7 @@ def addContracts(players):
 	return total / 1000
 
 def create_playerLine(player, numContracts, currentYear, writer):
-	name = player['firstName'] + " " + player['lastName']
+	name = player['firstName'].strip() + " " + player['lastName'].strip()
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
@@ -124,12 +181,6 @@ def autocreate():
 
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
-
-	# Generate dictionary of each team and their tids
-	teamDict = dict()
-	for team in export['teams']:
-			teamName = team['region'] + " " + team['name']
-			teamDict[teamName] = team['tid']
 
 	# Generate array that contains each teams score, rating, payroll, and PR
 	powerArr = []
@@ -191,7 +242,7 @@ def autocreate():
 					row = next(reader)
 					length -= 1
 					#print("Current Row in While: " + str(row))
-					if (row[1] == (player['firstName'].strip() + " " + player["lastName"].strip())):
+					if (row[1].strip() == (player['firstName'].strip() + " " + player["lastName"].strip())):
 						offerList.append(row)
 						#print("Offer List: " + str(offerList))
 
