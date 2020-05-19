@@ -54,7 +54,6 @@ def updateExport(isResign, decisionArr):
 		event['eid'] = len(export['events'])
 
 		export['events'].append(event)
-		print(event)
 
 	with open("updated.json", "w") as file:
 		json.dump(export, file)
@@ -123,7 +122,6 @@ def calc_score(teamRating, team):
 
 	if (gp > 0):
 		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 10
-		print(mov)
 		score = (mov * gp) / 82
 	else:
 		score = 0
