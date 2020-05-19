@@ -227,7 +227,7 @@ def autocreate():
 
 	with open("generated.csv", "a+", newline='') as file:
 		writer = csv.writer(file, delimiter=",")
-		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Facilities Rank"]
+		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Offer Years", "null spot/Facilities Rank"]
 		writer.writerow(start)
 
 		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception
