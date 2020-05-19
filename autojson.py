@@ -50,7 +50,7 @@ def updateExport(isResign, decisionArr):
 
 		# For some reason, the text for events only necessitates the team code and "label name": we only need
 		# Celtics, not Boston Celtics.
-		code = export['teams'][tid]['abbrev']
+		code = list(filter(lambda team: team['tid'] == tid, export['teams']))[0]['abbrev']
 		labelName = decision[1].split(" ")[-1]
 		
 		if (not isResign):
@@ -272,7 +272,7 @@ def autocreate():
 
 				for t_row in offerList:
 					teamName = t_row[0].strip()
-					teamData = export['teams'][teamDict[teamName]]
+					teamData =  list(filter(lambda team: team['tid'] == teamDict[teamName], export['teams']))[0]
 					teamPower = find_by_inner_value(powerArr, teamName, 0)
 
 					create_teamLine(t_row, teamData, teamPower, writer)
