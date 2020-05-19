@@ -6,6 +6,7 @@ import csv
 from faclass import Player
 from faclass import teamOffer
 import decisions
+import autojson
 
 MIN_SALARY = 0.9
 MAX_SALARY = 35.3
@@ -38,7 +39,7 @@ def check_hardCap(bid):
 		return False
 
 # Function that checks if an offer is valid with salary cap rules.
-def check_validity(player, bid, isResign, isMLE):
+def check_validity(player, bid, isResign, isMLE, payroll):
     if bid.offerAmount > MAX_SALARY:
         return 0
 
@@ -46,7 +47,7 @@ def check_validity(player, bid, isResign, isMLE):
         return 0
 
     if not isResign:
-        if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(float(row[3]))):
+        if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
             return 1
         else:
             print("The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name))
@@ -54,23 +55,8 @@ def check_validity(player, bid, isResign, isMLE):
     else:
         return 1
 
-auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1: ")
-
-if int(auto):
-
-	# Resets the list.txt file
-	open("list.txt", "w").close()
-
-	name = input("What is the name of the csv file? Include the .csv: ")
-
-	# file is formatted as follows: headers, then next line has player information:
-	# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Facilities Rank
-	# Player information line
-	# contracts
-	# next player information line, and so on
-	
-	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
-
+# Boiler-plate code that uses the CSV to make decisions. Most of the credit for this code goes to Tus.
+def csvToDecisions(isResign, name):
 	with open(name) as file:
 		reader = csv.reader(file)
 		next(reader)
@@ -81,7 +67,7 @@ if int(auto):
 				row = next(reader)
 				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]))
 				
-				if int(check_validity(player, bid, int(isResign), int(row[5]))):
+				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 					interest = player.returnInterest(bid)
 
 					if player.isrfa:
@@ -107,7 +93,7 @@ if int(auto):
 					row = next(reader)
 					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]))
 
-					if int(check_validity(player, bid, int(isResign), int(row[5]))):
+					if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 						offers.append(bid)
 						interests.append(player.returnInterest(bid))
 
@@ -137,6 +123,26 @@ if int(auto):
 				else:
 					print("There were no valid offers for {}\n\n".format(player.name))
 
+auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1. If you want to auto-create a csv and automate most of the process, type 2: ")
+
+# Resets the list.txt file
+open("list.txt", "w").close()
+
+if int(auto) == 2:
+	autojson.autocreate()
+	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
+	csvToDecisions(isResign, name="generated.csv")
+
+elif int(auto) == 1:
+	name = input("What is the name of the csv file? Include the .csv: ")
+	# file is formatted as follows: headers, then next line has player information:
+	# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Facilities Rank
+	# Player information line
+	# contracts
+	# next player information line, and so on
+	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
+	csvToDecisions(isResign, name=name)
+
 else:
 	name = input("Input name: ")
 	age = input("Input age: ")
@@ -159,7 +165,7 @@ else:
 		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(facility))
 		isResign = True
 
-		if int(check_validity(player, bid, isResign, 1)):
+		if int(check_validity(player, bid, isResign, 1, capSpace)):
 			interest = player.returnInterest(bid)
 
 			if (player.isrfa):
@@ -190,7 +196,7 @@ else:
 
 			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(facility))
 			
-			if int(check_validity(player, bid, 0, 1)):
+			if int(check_validity(player, bid, 0, 1, capSpace)):
 				offers.append(bid)
 				interests.append(player.returnInterest(bid))
 
