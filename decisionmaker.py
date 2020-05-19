@@ -80,7 +80,7 @@ def csvToDecisions(isResign, name):
 					resign = decisions.willSign(interest - 5)
 
 					if (resign):
-						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} years.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears)
+						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears, ("" if bid.offerYears == 1 else "s"))
 						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears])
 
 					else:
@@ -114,7 +114,7 @@ def csvToDecisions(isResign, name):
 							decisionAmount = offers[decisionAns].offerAmount
 							decisionYears = offers[decisionAns].offerYears
 
-							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} years.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears)
+							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears, ("" if decisionYears == 1 else "s"))
 							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears])
 							print(result)
 
