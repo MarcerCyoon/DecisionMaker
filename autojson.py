@@ -104,16 +104,17 @@ def create_teamLine(row, teamData, teamPower, writer):
 	offerAmount = row[2]
 	powerRank = teamPower[4]
 	payroll = teamPower[3] # fix to account for released player cap hits
-	role = row[3]
+	role = row[4]
 
-	if (row[4] == "Mid-Level Exception (MLE)"):
+	if (row[5] == "Mid-Level Exception (MLE)"):
 		isMLE = 1
 	else:
 		isMLE = 0
 
+	offerYears = row[3]
 	facilitiesRank = teamData['budget']['facilities']['rank']
 
-	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, facilitiesRank]
+	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank]
 	writer.writerow(line)
 
 # Auto-create a working FA CSV.
@@ -163,7 +164,7 @@ def autocreate():
 		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Facilities Rank"]
 		writer.writerow(start)
 
-		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Role, Exception
+		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception
 		with open("offers.csv", "r") as offers:
 			len_reader = csv.reader(offers)
 			length = len(list(len_reader)) - 2

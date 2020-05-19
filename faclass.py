@@ -130,10 +130,10 @@ class Player:
         return interest
         
 class teamOffer:
-    def __init__(self, teamName, offerAmount, powerRank, capSpace, role, facility):
+    def __init__(self, teamName, offerAmount, powerRank, capSpace, role, offerYears, facility):
         # Team Name
         self._teamName = teamName
-        
+
         # The Contract Offered by the Team
         self._offerAmount = offerAmount
         
@@ -145,6 +145,9 @@ class teamOffer:
         
         # The Role the Player will have on the team. (0 — Cap Room, 1 — Expendable, 2 — Bench, 3 — Starter, 4 - Star)
         self._role = role
+
+        # Offered Contract Years
+        self._offerYears = offerYears
 
         # The Facilities Rank of the Team
         self._facility = facility
@@ -170,7 +173,12 @@ class teamOffer:
         return self._role  
 
     @property
+    def offerYears(self):
+        return self._offerYears
+        
+    @property
     def facility(self):
         return self._facility
+    
     
         

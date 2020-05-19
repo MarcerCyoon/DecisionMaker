@@ -57,6 +57,9 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 
 # Boiler-plate code that uses the CSV to make decisions. Most of the credit for this code goes to Tus.
 def csvToDecisions(isResign, name):
+	# Decision Array that stores all decision results. This will be returned so that the export can be updated.
+	decisionArr = []
+
 	with open(name) as file:
 		reader = csv.reader(file)
 		next(reader)
@@ -65,7 +68,7 @@ def csvToDecisions(isResign, name):
 
 			if int(row[5]) == 1:
 				row = next(reader)
-				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]))
+				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]))
 				
 				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 					interest = player.returnInterest(bid)
@@ -78,11 +81,14 @@ def csvToDecisions(isResign, name):
 
 					if (resign):
 						result = "Final Decision: {} will sign with the {}.\n\n".format(player.name, bid.teamName)
+						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears])
+
 					else:
 						result = "Final Decision: {} will not sign with the {}.\n\n".format(player.name, bid.teamName)
 
 					print(result)
 
+					# list.txt is a text file that holds all decisions only for easy access
 					with open("list.txt", "a+") as file:
 						file.write(result)
 
@@ -91,7 +97,7 @@ def csvToDecisions(isResign, name):
 				interests = []
 				for i in range(int(row[5])):
 					row = next(reader)
-					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]))
+					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]))
 
 					if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 						offers.append(bid)
@@ -106,6 +112,7 @@ def csvToDecisions(isResign, name):
 						if (decisions.willSign(interests[decisionAns])):
 							decisionTeam = offers[decisionAns].teamName
 							result = "Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam)
+							decisionArr.append([player.name, decisionTeam, offers[decisionAns].offerAmount, offers[decisionAns].offerYears])
 							print(result)
 
 							with open("list.txt", "a+") as file:
@@ -123,6 +130,8 @@ def csvToDecisions(isResign, name):
 				else:
 					print("There were no valid offers for {}\n\n".format(player.name))
 
+	return decisionArr
+
 auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1. If you want to auto-create a csv and automate most of the process, type 2: ")
 
 # Resets the list.txt file
@@ -131,17 +140,18 @@ open("list.txt", "w").close()
 if int(auto) == 2:
 	autojson.autocreate()
 	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
-	csvToDecisions(isResign, name="generated.csv")
+	decisionArr = csvToDecisions(isResign, name="generated.csv")
+
 
 elif int(auto) == 1:
 	name = input("What is the name of the csv file? Include the .csv: ")
 	# file is formatted as follows: headers, then next line has player information:
-	# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Facilities Rank
+	# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Offer Years, null spot/Facilities Rank
 	# Player information line
 	# contracts
 	# next player information line, and so on
 	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
-	csvToDecisions(isResign, name=name)
+	decisionArr = csvToDecisions(isResign, name=name)
 
 else:
 	name = input("Input name: ")
@@ -157,12 +167,13 @@ else:
 	if int(situation) == 1:
 		teamName = input("Input Signing Team Name: ")
 		offer = input("Input Offer Amount (in millions): ")
+		years = input("Input Offer Years: ")
 		power = input("Input Power Ranking: ")
 		facility = input("Input Facilities Rank: ")
 		capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 		role = input("Input Role of the player in the team (0-4): ")
 
-		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(facility))
+		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
 		isResign = True
 
 		if int(check_validity(player, bid, isResign, 1, capSpace)):
@@ -189,12 +200,13 @@ else:
 		for i in range(0, int(run)):
 			teamName = input("Input Team Name: ")
 			offer = input("Input Offer Amount (in millions): ")
+			year = input("Input Offer Years: ")
 			power = input("Input Power Ranking: ")
 			facility = input("Input Facilities Rank: ")
 			capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 			role = input("Input Role of the player in the team (0-4): ")
 
-			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(facility))
+			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
 			
 			if int(check_validity(player, bid, 0, 1, capSpace)):
 				offers.append(bid)
