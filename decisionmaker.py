@@ -133,6 +133,13 @@ def csvToDecisions(isResign, name):
 				else:
 					print("There were no valid offers for {}\n\n".format(player.name))
 
+	with open("decisionMatrix.csv", "w", newline='') as file:
+		writer = csv.writer(file)
+
+		writer.writerow(["Name", "Signed With:", "AAV", "Years"])
+		for decision in decisionArr:
+			writer.writerow(decision)
+
 	return decisionArr
 
 auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1. If you want to auto-create a csv and automate most of the process, type 2: ")
@@ -147,7 +154,7 @@ if int(auto) == 2:
 
 	update = input("Type 1 if you want to automate ALL above signings. If there are errors or priority conflicts, type 0 to not auto: ")
 
-	if (update):
+	if int(update):
 		autojson.updateExport(isResign, decisionArr)
 
 elif int(auto) == 1:

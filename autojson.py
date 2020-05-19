@@ -3,14 +3,13 @@ import csv
 import math
 import collections
 
-
 with open("export.json", "r", encoding='utf-8-sig') as file:
+		
 		# Generate dictionary of each team and their tids
 		teamDict = dict()
 		for team in json.load(file)['teams']:
 				teamName = team['region'] + " " + team['name']
 				teamDict[teamName] = team['tid']
-
 
 def updateExport(isResign, decisionArr):
 	print(decisionArr)
