@@ -142,106 +142,110 @@ def csvToDecisions(isResign, name):
 
 	return decisionArr
 
-auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1. If you want to auto-create a csv and automate most of the process, type 2: ")
+def main():
+	auto = input("If you desire Manual Input, type 0. If you are using a spreadsheet/csv of some kind, type 1. If you want to auto-create a csv and automate most of the process, type 2: ")
 
-# Resets the list.txt file
-open("list.txt", "w").close()
+	# Resets the list.txt file
+	open("list.txt", "w").close()
 
-if int(auto) == 2:
-	autojson.autocreate()
-	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
-	decisionArr = csvToDecisions(isResign, name="generated.csv")
+	if int(auto) == 2:
+		autojson.autocreate()
+		isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
+		decisionArr = csvToDecisions(isResign, name="generated.csv")
 
-	update = input("Type 1 if you want to automate ALL above signings. If there are errors or priority conflicts, type 0 to not auto: ")
+		update = input("Type 1 if you want to automate ALL above signings. If there are errors or priority conflicts, type 0 to not auto: ")
 
-	if int(update):
-		autojson.updateExport(isResign, decisionArr)
+		if int(update):
+			autojson.updateExport(isResign, decisionArr)
 
-elif int(auto) == 1:
-	name = input("What is the name of the csv file? Include the .csv: ")
-	# file is formatted as follows: headers, then next line has player information:
-	# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Offer Years, null spot/Facilities Rank
-	# Player information line
-	# contracts
-	# next player information line, and so on
-	isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
-	decisionArr = csvToDecisions(isResign, name=name)
-
-else:
-	name = input("Input name: ")
-	age = input("Input age: ")
-	ovr = input("Input overall in BBGM: ")
-	ask = input("Input asking amount (in millions): ")
-	isrfa = input("If this player is a UFA, type 0. If this player is an RFA, type 1: ")
-
-	player = Player(name, int(age), int(ovr), float(ask), int(isrfa))
-
-	situation = input("If you are evaluating a re-sign situation or a situation where a player has one offer, type 1. If this is an Open FA situation, type 2: ")
-
-	if int(situation) == 1:
-		teamName = input("Input Signing Team Name: ")
-		offer = input("Input Offer Amount (in millions): ")
-		years = input("Input Offer Years: ")
-		power = input("Input Power Ranking: ")
-		facility = input("Input Facilities Rank: ")
-		capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
-		role = input("Input Role of the player in the team (0-4): ")
-
-		bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
-		isResign = True
-
-		if int(check_validity(player, bid, isResign, 1, capSpace)):
-			interest = player.returnInterest(bid)
-
-			if (player.isrfa):
-				print("Player is RFA. Reducing interest.")
-				interest -= 15
-
-			resign = decisions.willSign(interest - 5)
-
-			if (resign):
-				print("{} will sign with the {}.\n\n".format(player.name, bid.teamName))
-			else:
-				print("{} will not sign with the {}.\n\n".format(player.name, bid.teamName))
-
+	elif int(auto) == 1:
+		name = input("What is the name of the csv file? Include the .csv: ")
+		# file is formatted as follows: headers, then next line has player information:
+		# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Offer Years, null spot/Facilities Rank
+		# Player information line
+		# contracts
+		# next player information line, and so on
+		isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
+		decisionArr = csvToDecisions(isResign, name=name)
 
 	else:
-		run = input("Number of contracts being offered to this player: ")
+		name = input("Input name: ")
+		age = input("Input age: ")
+		ovr = input("Input overall in BBGM: ")
+		ask = input("Input asking amount (in millions): ")
+		isrfa = input("If this player is a UFA, type 0. If this player is an RFA, type 1: ")
 
-		offers = []
-		interests = []
+		player = Player(name, int(age), int(ovr), float(ask), int(isrfa))
 
-		for i in range(0, int(run)):
-			teamName = input("Input Team Name: ")
+		situation = input("If you are evaluating a re-sign situation or a situation where a player has one offer, type 1. If this is an Open FA situation, type 2: ")
+
+		if int(situation) == 1:
+			teamName = input("Input Signing Team Name: ")
 			offer = input("Input Offer Amount (in millions): ")
-			year = input("Input Offer Years: ")
+			years = input("Input Offer Years: ")
 			power = input("Input Power Ranking: ")
 			facility = input("Input Facilities Rank: ")
 			capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 			role = input("Input Role of the player in the team (0-4): ")
 
 			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
-			
-			if int(check_validity(player, bid, 0, 1, capSpace)):
-				offers.append(bid)
-				interests.append(player.returnInterest(bid))
+			isResign = True
 
-		numCheck = min(3, len(offers))
+			if int(check_validity(player, bid, isResign, 1, capSpace)):
+				interest = player.returnInterest(bid)
 
-		if offers:
-			for i in range(0, numCheck):
-				decisionAns = decisions.makeDecision(interests)
-				print("Choice: {}; time to check".format(offers[decisionAns].teamName))
+				if (player.isrfa):
+					print("Player is RFA. Reducing interest.")
+					interest -= 15
 
-				if (decisions.willSign(interests[decisionAns])):
-					decisionTeam = offers[decisionAns].teamName
-					print("Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam))
-					break
+				resign = decisions.willSign(interest - 5)
 
-				if (i == numCheck - 1):
-					print("Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name))
+				if (resign):
+					print("{} will sign with the {}.\n\n".format(player.name, bid.teamName))
+				else:
+					print("{} will not sign with the {}.\n\n".format(player.name, bid.teamName))
+
 
 		else:
-			print("There were no valid offers for {}\n\n".format(player.name))
+			run = input("Number of contracts being offered to this player: ")
 
-input("Press ENTER to exit")
+			offers = []
+			interests = []
+
+			for i in range(0, int(run)):
+				teamName = input("Input Team Name: ")
+				offer = input("Input Offer Amount (in millions): ")
+				year = input("Input Offer Years: ")
+				power = input("Input Power Ranking: ")
+				facility = input("Input Facilities Rank: ")
+				capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
+				role = input("Input Role of the player in the team (0-4): ")
+
+				bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
+				
+				if int(check_validity(player, bid, 0, 1, capSpace)):
+					offers.append(bid)
+					interests.append(player.returnInterest(bid))
+
+			numCheck = min(3, len(offers))
+
+			if offers:
+				for i in range(0, numCheck):
+					decisionAns = decisions.makeDecision(interests)
+					print("Choice: {}; time to check".format(offers[decisionAns].teamName))
+
+					if (decisions.willSign(interests[decisionAns])):
+						decisionTeam = offers[decisionAns].teamName
+						print("Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam))
+						break
+
+					if (i == numCheck - 1):
+						print("Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name))
+
+			else:
+				print("There were no valid offers for {}\n\n".format(player.name))
+
+	input("Press ENTER to exit")
+
+if __name__ == "__main__":
+	main()
