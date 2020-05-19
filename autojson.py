@@ -51,8 +51,8 @@ def updateExport(isResign, decisionArr):
 		# For some reason, the text for events only necessitates the team code and "label name": we only need
 		# Celtics, not Boston Celtics.
 		code = list(filter(lambda team: team['tid'] == tid, export['teams']))[0]['abbrev']
-		labelName = decision[1].split(" ")[-1]
-		
+		labelName = list(filter(lambda team: team['tid'] == tid, export['teams']))[0]['name']
+
 		if (not isResign):
 			event['type'] = 'reSigned'
 			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> re-signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % decision[2], exp)
