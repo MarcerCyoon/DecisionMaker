@@ -3,6 +3,7 @@ import csv
 import math
 import collections
 
+# Global teamDict, @ me fools
 with open("export.json", "r", encoding='utf-8-sig') as file:
 		
 		# Generate dictionary of each team and their tids
@@ -11,6 +12,8 @@ with open("export.json", "r", encoding='utf-8-sig') as file:
 				teamName = team['region'] + " " + team['name']
 				teamDict[teamName] = team['tid']
 
+# Update an existing export named "export.json" with Free Agency decisions found in a decisionArr.
+# This should perfectly emulate actually signing them in the BBGM game.
 def updateExport(isResign, decisionArr):
 	print(decisionArr)
 
@@ -27,6 +30,11 @@ def updateExport(isResign, decisionArr):
 		player['tid'] = tid
 		player['contract']['amount'] = decision[2] * 1000
 
+		# If the current phase of the game is the "Regular Season" or the "Preseason",
+		# then signing a contract will include the current year.
+		# For example, if Isaiah Thomas signs a 1-year deal in 2020, it will expire at the end of 2020.
+		# However, if you sign Isaiah Thomas in a 1-year deal in the 2020 offseason, it will expire at
+		# the end of 2021. Thus, a distinction needs to be made depending on the current phase.
 		if (phase == "regular" or phase == "preseason"):
 			exp = decision[3] + currentYear - 1
 			player['contract']['exp'] = exp
@@ -34,8 +42,14 @@ def updateExport(isResign, decisionArr):
 			exp = decision[3] + currentYear
 			player['contract']['exp'] = exp
 
+		# To fully emulate the way signings are worked in-game, we must also create a corresponding event
+		# in the game's code that tells us that so-and-so signed with such-and-such team. This is important
+		# not only for error-identification purposes, but also makes league history and transactions
+		# be kept complete.
 		event = dict()
 
+		# For some reason, the text for events only necessitates the team code and "label name": we only need
+		# Celtics, not Boston Celtics.
 		code = export['teams'][tid]['abbrev']
 		labelName = decision[1].split(" ")[-1]
 		
@@ -50,6 +64,9 @@ def updateExport(isResign, decisionArr):
 		event['pids'] = [player['pid']]
 		event['tids'] = [teamDict[decision[1]]]
 		event['season'] = currentYear
+		# The eid of the current event would have to be the next available eid.
+		# That would just be the current amount of events, as each event has a corresponding
+		# eid and they start at 0 instead of 1.
 		event['eid'] = len(export['events'])
 
 		export['events'].append(event)
@@ -58,6 +75,7 @@ def updateExport(isResign, decisionArr):
 		json.dump(export, file)
 		print("New Export Created.")
 
+# Check to see if a player exists by trying to catch an IndexError
 def playerExists(name, players):
 	try:
 		check = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
@@ -157,7 +175,7 @@ def create_teamLine(row, teamData, teamPower, writer):
 	teamName = row[0].strip()
 	offerAmount = row[2]
 	powerRank = teamPower[4]
-	payroll = teamPower[3] # fix to account for released player cap hits
+	payroll = teamPower[3] # need to fix to account for released player cap hits
 	role = row[4]
 
 	if (row[5] == "Mid-Level Exception (MLE)"):
@@ -226,22 +244,21 @@ def autocreate():
 				name = row[1].strip()
 
 				if (playerExists(name, export['players'])):
+					# This filters the entire list for the player we want (the one that has the same name.)
 					player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, export['players']))[0]
 
 				else:
 					print("{} does not exist!".format(name))
-					input("Press ENTER to exit")
 					break
 
 				offerList = []
 				offerList.append(row)
 				while True:
 					row = next(reader)
+					# We use our own iterator, 'length', as doing any sort of check on 'reader' causes things to break (forces it to iterate).
 					length -= 1
-					#print("Current Row in While: " + str(row))
 					if (row[1].strip() == (player['firstName'].strip() + " " + player["lastName"].strip())):
 						offerList.append(row)
-						#print("Offer List: " + str(offerList))
 
 						if (length == 0):
 							break
