@@ -62,7 +62,7 @@ def updateExport(isResign, decisionArr):
 			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % decision[2], exp)
 		
 		event['pids'] = [player['pid']]
-		event['tids'] = [teamDict[decision[1]]]
+		event['tids'] = [tid]
 		event['season'] = currentYear
 		# The eid of the current event would have to be the next available eid.
 		# That would just be the current amount of events, as each event has a corresponding
