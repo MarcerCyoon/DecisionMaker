@@ -80,7 +80,7 @@ def csvToDecisions(isResign, name):
 					resign = decisions.willSign(interest - 5)
 
 					if (resign):
-						result = "Final Decision: {} will sign with the {}.\n\n".format(player.name, bid.teamName)
+						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} years.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears)
 						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears])
 
 					else:
@@ -111,8 +111,11 @@ def csvToDecisions(isResign, name):
 
 						if (decisions.willSign(interests[decisionAns])):
 							decisionTeam = offers[decisionAns].teamName
-							result = "Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam)
-							decisionArr.append([player.name, decisionTeam, offers[decisionAns].offerAmount, offers[decisionAns].offerYears])
+							decisionAmount = offers[decisionAns].offerAmount
+							decisionYears = offers[decisionAns].offerYears
+
+							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} years.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears)
+							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears])
 							print(result)
 
 							with open("list.txt", "a+") as file:
