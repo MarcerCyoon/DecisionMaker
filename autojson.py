@@ -88,10 +88,10 @@ def playerExists(name, players):
 # More formal definition:
 # For a list within a list, this will return the inner list that has the specified value at the index in the inner list
 # Fail condition: array of -1
-def find_by_inner_value(powerArr, value, index):
-	for i in range(0, len(powerArr)):
-		if powerArr[i][index] == value:
-			return powerArr[i]
+def find_by_inner_value(array, value, index):
+	for i in range(0, len(array)):
+		if array[i][index] == value:
+			return array[i]
 
 	return [-1]
 
