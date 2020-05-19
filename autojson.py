@@ -1,31 +1,52 @@
 import json
 import csv
 import math
+import collections
+
+def playerExists(name, players):
+	try:
+		check = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
+	except IndexError:
+		return 0
+
+	return 1
+
+# Small helper function I made so that I could find the right list within a list for a team
+# More formal definition:
+# For a list within a list, this will return the inner list that has the specified value at the index in the inner list
+# Fail condition: array of -1
+def find_by_inner_value(powerArr, value, index):
+	for i in range(0, len(powerArr)):
+		if powerArr[i][index] == value:
+			return powerArr[i]
+
+	return [-1]
 
 # Calculate years active by subtracting the player's draft year from the current year
-def yearsActive(player):
+def yearsActive(player, currentYear):
 	return currentYear - int(player['draft']['year'])
 
 # Check to see if a player was released.
 # This function works as there are only two ways a player has been released / traded and is ineligible for RFA:
 # 1. The player's latest years with team is not equal to the years active
 # 2. The player did not play in the latest season.
-def wasReleased(player):
-	return player['stats'][-1]['yearsWithTeam'] != yearsActive(player) or player['stats'][-1]['season'] != currentYear
+def wasReleased(player, currentYear):
+	return player['stats'][-1]['yearsWithTeam'] != yearsActive(player, currentYear) or player['stats'][-1]['season'] != currentYear
 
 # Rules for RFA in Exodus:
 # 1. Must be a first round pick
 # 2. Must be an expiring rookie (3 or 4 years in the league)
-def determineRFA(player):
+def determineRFA(player, currentYear):
 	if (player['draft']['round'] != 1):
 		return 0
-	elif (wasReleased(player)):
+	elif (wasReleased(player, currentYear)):
 		return 0
-	elif (yearsActive(player) != 3 and yearsActive(player) != 4):
+	elif (yearsActive(player, currentYear) != 3 and yearsActive(player, currentYear) != 4):
 		return 0
 	else:
 		return 1
 
+# Formula taken straight out of BBGM code
 def calc_teamRating(players):
 	ovrs = []
 	for player in players:
@@ -34,11 +55,30 @@ def calc_teamRating(players):
 	while (len(ovrs) < 10):
 		ovrs.append(0)
 
-	# Formula taken straight out of BBGM code
 	predictedMOV = -124.13 +0.4417 * math.exp(-0.1905 * 0) * ovrs[0] +0.4417 * math.exp(-0.1905 * 1) * ovrs[1] +0.4417 * math.exp(-0.1905 * 2) * ovrs[2] + 0.4417 * math.exp(-0.1905 * 3) * ovrs[3] +0.4417 * math.exp(-0.1905 * 4) * ovrs[4] +0.4417 * math.exp(-0.1905 * 5) * ovrs[5] +0.4417 * math.exp(-0.1905 * 6) * ovrs[6] +0.4417 * math.exp(-0.1905 * 7) * ovrs[7] +0.4417 * math.exp(-0.1905 * 8) * ovrs[8] +0.4417 * math.exp(-0.1905 * 9) * ovrs[9]
 	rawOVR = (predictedMOV * 50) / 20 + 50
 
-	return max(0, rawOVR)
+	return max(0, round(rawOVR))
+
+# Formula also taken straight out of BBGM code
+def calc_score(teamRating, team):
+	gp = team['stats'][-1]['gp']
+
+	if (gp > 0):
+		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 10
+		print(mov)
+		score = (mov * gp) / 82
+	else:
+		score = 0
+
+	estimated_mov = teamRating * 0.6 - 30
+	score += estimated_mov
+
+	last_ten = collections.Counter(team['seasons'][-1]['lastTen'])[1]
+
+	score += -10 + (2 * last_ten)
+
+	return score
 
 # Add up all the contracts of a team to find its payroll
 def addContracts(players):
@@ -49,21 +89,21 @@ def addContracts(players):
 
 	return total / 1000
 
-def create_playerLine(player, numContracts, writer):
+def create_playerLine(player, numContracts, currentYear, writer):
 	name = player['firstName'] + " " + player['lastName']
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
-	isRFA = determineRFA(player)
+	isRFA = determineRFA(player, currentYear)
 
 	line = [name, age, ovr, askingAmount, isRFA, numContracts]
 	writer.writerow(line)
 
-def create_teamLine(row, teamData, teamPlayers, writer):
+def create_teamLine(row, teamData, teamPower, writer):
 	teamName = row[0]
 	offerAmount = row[2]
-	powerRank = calc_teamRating(teamPlayers) # fix
-	payroll = addContracts(teamPlayers) # fix
+	powerRank = teamPower[4]
+	payroll = teamPower[3] # fix to account for released player cap hits
 	role = row[3]
 
 	if (row[4] == "Mid-Level Exception (MLE)"):
@@ -76,67 +116,97 @@ def create_teamLine(row, teamData, teamPlayers, writer):
 	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, facilitiesRank]
 	writer.writerow(line)
 
+# Auto-create a working FA CSV.
+def autocreate():
+	with open("export.json", "r", encoding='utf-8-sig') as file:
+	    export = json.load(file)
 
-with open("export.json", "r", encoding='utf-8-sig') as file:
-    export = json.load(file)
+	text = export['meta']['phaseText']
+	currentYear = int(text.split(" ")[0])
 
-text = export['meta']['phaseText']
-currentYear = int(text.split(" ")[0])
+	# Generate dictionary of each team and their tids
+	teamDict = dict()
+	for team in export['teams']:
+			teamName = team['region'] + " " + team['name']
+			teamDict[teamName] = team['tid']
 
-# Generate dictionary of each team and their tids
-teamDict = dict()
-for team in export['teams']:
-		teamName = team['region'] + " " + team['name']
-		teamDict[teamName] = team['tid']
+	# Generate array that contains each teams score, rating, payroll, and PR
+	powerArr = []
 
-# Resets CSV
-open("generated.csv", "w").close()
+	for team in export['teams']:
+		tid = team['tid']
+		teamPlayers = []
+		for player in export['players']:
+		    if(player['tid'] == tid):
+		        teamPlayers.append(player)
 
-with open("generated.csv", "a+", newline='') as file:
-	writer = csv.writer(file, delimiter=",")
-	start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Facilities Rank"]
-	writer.writerow(start)
+		# Sort in terms of OVR       
+		teamPlayers = sorted(teamPlayers, key=lambda i:i['ratings'][-1]['ovr'], reverse=True)
 
-	# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Role, Exception
-	with open("offers.csv", "r") as offers:
-		len_reader = csv.reader(offers)
-		length = len(list(len_reader)) - 2
-		print("Length: " + str(length))
+		name = team['region'] + " " + team['name']
+		rating = calc_teamRating(teamPlayers)
+		score = calc_score(rating, team)
+		payroll = addContracts(teamPlayers)
+		powerArr.append([name, score, rating, payroll, -1])
 
-		offers.seek(0)
-		reader = csv.reader(offers)
-		next(reader)
-		row = next(reader)
+	powerArr = sorted(powerArr, key=lambda i:i[1], reverse=True)
+	
+	for i in range(0, len(powerArr)):
+		# Doing min(i + 1, 30) because the PR value can only go from 1-30
+		powerArr[i][4] = min(i + 1, 30)
 
-		while length > 0:
-			nameList = row[1].split(" ")[:2]
-			player = list(filter(lambda player: player['firstName'].strip() == nameList[0] and player['lastName'].strip() == nameList[1], export['players']))[0]
+	# Resets CSV
+	open("generated.csv", "w").close()
 
-			offerList = []
-			offerList.append(row)
-			while True:
-				row = next(reader)
-				length -= 1
-				print("Current Row in While: " + str(row))
-				if (row[1] == (player['firstName'].strip() + " " + player["lastName"].strip())):
-					offerList.append(row)
-					print("Offer List: " + str(offerList))
+	with open("generated.csv", "a+", newline='') as file:
+		writer = csv.writer(file, delimiter=",")
+		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Facilities Rank"]
+		writer.writerow(start)
 
-					if (length == 0):
-						break
+		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Role, Exception
+		with open("offers.csv", "r") as offers:
+			len_reader = csv.reader(offers)
+			length = len(list(len_reader)) - 2
+
+			offers.seek(0)
+			reader = csv.reader(offers)
+			next(reader)
+			row = next(reader)
+
+			while length > 0:
+				name = row[1].strip()
+
+				if (playerExists(name, export['players'])):
+					player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, export['players']))[0]
 
 				else:
-					print("those were all the offers!")
+					print("{} does not exist!".format(name))
+					input("Press ENTER to exit")
 					break
 
-			numContracts = len(offerList)
-			create_playerLine(player, numContracts, writer)
+				offerList = []
+				offerList.append(row)
+				while True:
+					row = next(reader)
+					length -= 1
+					#print("Current Row in While: " + str(row))
+					if (row[1] == (player['firstName'].strip() + " " + player["lastName"].strip())):
+						offerList.append(row)
+						#print("Offer List: " + str(offerList))
 
-			for t_row in offerList:
-				teamPlayers = []
-				for player in export['players']:
-				    if(player['tid'] == teamDict[t_row[0]]):
-				        teamPlayers.append(player)
+						if (length == 0):
+							break
 
-				teamData = export['teams'][teamDict[t_row[0]]]
-				create_teamLine(t_row, teamData, teamPlayers, writer)
+					else:
+						print("Those were all the offers!")
+						break
+
+				numContracts = len(offerList)
+				create_playerLine(player, numContracts, currentYear, writer)
+
+				for t_row in offerList:
+					teamName = t_row[0].strip()
+					teamData = export['teams'][teamDict[teamName]]
+					teamPower = find_by_inner_value(powerArr, teamName, 0)
+
+					create_teamLine(t_row, teamData, teamPower, writer)
