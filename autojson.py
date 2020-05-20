@@ -177,6 +177,7 @@ def create_teamLine(row, teamData, teamPower, writer):
 	powerRank = teamPower[4]
 	payroll = teamPower[3] # need to fix to account for released player cap hits
 	role = row[4]
+	option = row[6]
 
 	if (row[5] == "Mid-Level Exception (MLE)"):
 		isMLE = 1
@@ -186,7 +187,7 @@ def create_teamLine(row, teamData, teamPower, writer):
 	offerYears = row[3]
 	facilitiesRank = teamData['budget']['facilities']['rank']
 
-	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank]
+	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
 	writer.writerow(line)
 
 # Auto-create a working FA CSV.
@@ -227,10 +228,10 @@ def autocreate():
 
 	with open("generated.csv", "a+", newline='') as file:
 		writer = csv.writer(file, delimiter=",")
-		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Offer Years", "null spot/Facilities Rank"]
+		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
 		writer.writerow(start)
 
-		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception
+		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception, Option
 		with open("offers.csv", "r") as offers:
 			len_reader = csv.reader(offers)
 			length = len(list(len_reader)) - 2

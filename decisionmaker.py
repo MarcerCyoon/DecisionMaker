@@ -68,7 +68,7 @@ def csvToDecisions(isResign, name):
 
 			if int(row[5]) == 1:
 				row = next(reader)
-				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]))
+				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
 				
 				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 					interest = player.returnInterest(bid)
@@ -97,7 +97,7 @@ def csvToDecisions(isResign, name):
 				interests = []
 				for i in range(int(row[5])):
 					row = next(reader)
-					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]))
+					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
 
 					if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 						offers.append(bid)
@@ -161,7 +161,7 @@ def main():
 	elif int(auto) == 1:
 		name = input("What is the name of the csv file? Include the .csv: ")
 		# file is formatted as follows: headers, then next line has player information:
-		# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Offer Years, null spot/Facilities Rank
+		# Name/Team, Age/Offer, OVR/Power Ranking, Asking Amount/Team Payroll, isRFA (0 or 1)/Player Role, # of Contracts/Use MLE (0 or 1), null spot/Offer Years, null spot/Facilities Rank, null spot/Options
 		# Player information line
 		# contracts
 		# next player information line, and so on
@@ -183,12 +183,13 @@ def main():
 			teamName = input("Input Signing Team Name: ")
 			offer = input("Input Offer Amount (in millions): ")
 			years = input("Input Offer Years: ")
+			option = input("Type TO for TO, PO for PO, and None for No Option: ")
 			power = input("Input Power Ranking: ")
 			facility = input("Input Facilities Rank: ")
 			capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 			role = input("Input Role of the player in the team (0-4): ")
 
-			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
+			bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility), option)
 			isResign = True
 
 			if int(check_validity(player, bid, isResign, 1, capSpace)):
@@ -216,12 +217,13 @@ def main():
 				teamName = input("Input Team Name: ")
 				offer = input("Input Offer Amount (in millions): ")
 				year = input("Input Offer Years: ")
+				option = input("Type TO for TO, PO for PO, and None for No Option: ")
 				power = input("Input Power Ranking: ")
 				facility = input("Input Facilities Rank: ")
 				capSpace = input("Input Current Team Payroll (excluding player being offered's contract): ")
 				role = input("Input Role of the player in the team (0-4): ")
 
-				bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility))
+				bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility), option)
 				
 				if int(check_validity(player, bid, 0, 1, capSpace)):
 					offers.append(bid)

@@ -121,6 +121,13 @@ class Player:
         # Contract Interest is ultimately calculated linearly.
         # Might change this.
         contractInterest = (interestVar / comp) * 100
+
+        # Add Options modifier
+        # Team Options subtract 5 interest, Player Options add 5 interest.
+        if (teamOffer.option == 1):
+            contractInterest -= 5
+        elif (teamOffer.option == 2):
+            contractInterest += 5
         
         print("Contract Interest: {}".format(contractInterest))
 
@@ -130,7 +137,7 @@ class Player:
             # Tus is the GOAT and you can't tell me otherwise
             desiredYears = get_desired_years(self._age, self._ovr)
             yearDifference = abs(desiredYears - teamOffer.offerYears)
-            
+
             # This polynomial fit was created such that:
             # if yearDifference = 0, interest = 100
             # if yearDifference = 1, interest = 80
@@ -179,7 +186,7 @@ class Player:
         return interest
         
 class teamOffer:
-    def __init__(self, teamName, offerAmount, powerRank, capSpace, role, offerYears, facility):
+    def __init__(self, teamName, offerAmount, powerRank, capSpace, role, offerYears, facility, option=None):
         # Team Name
         self._teamName = teamName
 
@@ -200,6 +207,14 @@ class teamOffer:
 
         # The Facilities Rank of the Team
         self._facility = facility
+
+        # Whether it is a team, player, or no option
+        if (option == "TO"):
+            self._option = 1
+        elif (option == "PO"):
+            self._option = 2
+        else:
+            self._option = 0
         
     @property
     def teamName(self):
@@ -228,6 +243,10 @@ class teamOffer:
     @property
     def facility(self):
         return self._facility
+    
+    @property
+    def option(self):
+        return self._option
     
     
         
