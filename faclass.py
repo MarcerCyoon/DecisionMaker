@@ -3,22 +3,27 @@ import random
 
 # Subroutines – also makes things look nice and easy to find.
 
+# Weighted sigmoid
 def get_moneyImportance(age, ovr):
     rnd = random.uniform(-.1, .1)
     return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
 
+# Year Importance was found by finding an exponential fit for [100, 0.4], [30, 0.1], [65, 0.3]
 def get_yearImportance(ovr):
     rnd = random.uniform(-0.05, 0.05)
     return rnd + .0928289 * math.exp(.0149981 * ovr)
 
+# Weighted sigmoid
 def get_roleImportance(age, ovr):
     rnd = random.uniform(-.1, .1)
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
 
+# Weighted sigmoid
 def get_ringImportance(age):
     rnd = random.uniform(-.1, .1)
     return (.0192308 * age) - .146154 + rnd
 
+# I just made this up
 def get_facilityImportance():
     rnd = random.uniform(-.05, .05)
     return 0.25 + rnd
