@@ -4,3 +4,5 @@
 /__pycache__
 *.txt
 *.json
+!docs/samples/*.json
+!docs/samples/*.csv
