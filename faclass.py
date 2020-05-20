@@ -7,6 +7,10 @@ def get_moneyImportance(age, ovr):
     rnd = random.uniform(-.1, .1)
     return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
 
+def get_yearImportance(ovr):
+    rnd = random.uniform(-0.05, 0.05)
+    return rnd + .0928289 * math.exp(.0149981 * ovr)
+
 def get_roleImportance(age, ovr):
     rnd = random.uniform(-.1, .1)
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
@@ -19,8 +23,35 @@ def get_facilityImportance():
     rnd = random.uniform(-.05, .05)
     return 0.25 + rnd
 
+# A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
+# We then convert the Gaussian Distribution into a value between [1, 5], so that's it is actually,
+# you know, desired years.
+# Sidenote: Tus is a GOAT. Shoutouts to him for all this code.
+# Sidenote 2: The constant values were discovered after fitting a Gaussian Distribution to
+# sample data, so they are not random.
+# If you want more information, read equations.pdf by tus, provided in this repo.
+def get_desired_years(age, ovr):
+    a = 278603
+    b = -8.10721
+    mu_age = 25.955128
+    mu_ovr = 79.384615
+    sigma_age = 1.524766
+    sigma_ovr = 4.125377
+    
+    normalization = 1 / (2 * math.pi * sigma_age * sigma_ovr)
+    exponent = -.5 * ((((age - mu_age) / sigma_age) ** 2) + (((ovr - mu_ovr) / sigma_ovr) ** 2))
+    years = ((math.log(normalization) + exponent) / b) - math.log(a) / b
+    
+    if years < 2:
+        years = 2
+    elif years > 5:
+        years = 5
+
+    return years
+
 def calcImportance(age, ovr):
     moneyImportance = get_moneyImportance(age, ovr)
+    yearImportance = get_yearImportance(ovr)
     roleImportance = get_roleImportance(age, ovr)
     ringImportance = get_ringImportance(age)
     facilityImportance = get_facilityImportance()
@@ -28,9 +59,10 @@ def calcImportance(age, ovr):
     print("Ring Importance: {}".format(ringImportance))
     print("Role Importance: {}".format(roleImportance))
     print("Money Importance: {}".format(moneyImportance))
+    print("Year Importance: {}".format(yearImportance))
     print("Facility Importance: {}".format(facilityImportance))
 
-    return (ringImportance, roleImportance, moneyImportance, facilityImportance)
+    return (ringImportance, roleImportance, moneyImportance, yearImportance, facilityImportance)
 
 class Player:
     def __init__(self, name, age, ovr, askingAmount, isrfa):
@@ -46,7 +78,7 @@ class Player:
         # Whether the player is an RFA or not
         self._isrfa = isrfa
 
-        self._ringImportance, self._roleImportance, self._moneyImportance, self._facilityImportance = calcImportance(self._age, self._ovr)
+        self._ringImportance, self._roleImportance, self._moneyImportance, self._yearImportance, self._facilityImportance = calcImportance(self._age, self._ovr)
     
     @property
     def name(self):
@@ -92,6 +124,23 @@ class Player:
         
         print("Contract Interest: {}".format(contractInterest))
 
+        if (teamOffer.offerYears == 1):
+            yearInterest = 0
+        else:
+            # Tus is the GOAT and you can't tell me otherwise
+            desiredYears = get_desired_years(self._age, self._ovr)
+            yearDifference = abs(desiredYears - teamOffer.offerYears)
+            
+            # This polynomial fit was created such that:
+            # if yearDifference = 0, interest = 100
+            # if yearDifference = 1, interest = 80
+            # if yearDifference = 2, interest = 50
+            # if yearDifference = 3, interest = 10
+            # if yearDifference = 4, interest = 0
+            yearInterest = max(0, -5 * (yearDifference ** 2) - 15 * yearDifference + 100)
+
+        print("Year Interest: {}".format(yearInterest))
+
         # Flip Power Ranking such that a better power ranking has a higher number; for example,
         # if you are #1 in PR your powerScore should be 30.
         powerScore = 31 - teamOffer.powerRank
@@ -119,8 +168,8 @@ class Player:
         print("Facility Interest: {}".format(facilityInterest))
         
         # Final interest is a weighted average of the three interests.
-        sigma = (contractInterest * self._moneyImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance) + (facilityInterest * self._facilityImportance)
-        interest = int(sigma / (self._ringImportance + self._moneyImportance + self._roleImportance + self._facilityImportance))
+        sigma = (contractInterest * self._moneyImportance) + (yearInterest * self._yearImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance) + (facilityInterest * self._facilityImportance)
+        interest = int(sigma / (self._ringImportance + self._moneyImportance + self._yearImportance + self._roleImportance + self._facilityImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-5, 5)
