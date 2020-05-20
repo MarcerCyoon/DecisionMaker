@@ -29,7 +29,7 @@ def get_facilityImportance():
     return 0.25 + rnd
 
 # A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
-# We then convert the Gaussian Distribution into a value between [1, 5], so that's it is actually,
+# We then convert the Gaussian Distribution into a value between [1, 5], so that's it's actually,
 # you know, desired years.
 # Sidenote: Tus is a GOAT. Shoutouts to him for all this code.
 # Sidenote 2: The constant values were discovered after fitting a Gaussian Distribution to
@@ -252,6 +252,3 @@ class teamOffer:
     @property
     def option(self):
         return self._option
-    
-    
-        
