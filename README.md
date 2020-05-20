@@ -1,7 +1,7 @@
 # DecisionMaker
 A decision-making algorithm for the Exodus League, a BBGM NBA simulation league.
 
-Currently, this algorithm is on version 5.0.0.
+Currently, this algorithm is on version 5.0.1.
 
 To run the program, download all the files in a folder then run
 "decisionmaker.py", the main file for the algorithm.

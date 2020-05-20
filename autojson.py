@@ -153,10 +153,13 @@ def calc_score(teamRating, team):
 	return score
 
 # Add up all the contracts of a team to find its payroll
-def addContracts(players):
+def addContracts(players, releasedPlayers):
 	total = 0
 
 	for player in players:
+		total += player['contract']['amount']
+
+	for player in releasedPlayers:
 		total += player['contract']['amount']
 
 	return total / 1000
@@ -175,7 +178,7 @@ def create_teamLine(row, teamData, teamPower, writer):
 	teamName = row[0].strip()
 	offerAmount = row[2]
 	powerRank = teamPower[4]
-	payroll = teamPower[3] # need to fix to account for released player cap hits
+	payroll = teamPower[3]
 	role = row[4]
 	option = row[6]
 
@@ -211,10 +214,13 @@ def autocreate():
 		# Sort in terms of OVR       
 		teamPlayers = sorted(teamPlayers, key=lambda i:i['ratings'][-1]['ovr'], reverse=True)
 
+		# Get released players, as they count against the cap
+		releasedPlayers = list(filter(lambda release: release['tid'] == tid, export['releasedPlayers']))
+
 		name = team['region'] + " " + team['name']
 		rating = calc_teamRating(teamPlayers)
 		score = calc_score(rating, team)
-		payroll = addContracts(teamPlayers)
+		payroll = addContracts(teamPlayers, releasedPlayers)
 		powerArr.append([name, score, rating, payroll, -1])
 
 	powerArr = sorted(powerArr, key=lambda i:i[1], reverse=True)
