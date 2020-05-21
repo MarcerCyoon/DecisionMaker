@@ -136,12 +136,18 @@ class Player:
         
         print("Contract Interest: {}".format(contractInterest))
 
-        if (teamOffer.offerYears == 1):
+        if (teamOffer.option == 2):
+            # If PO is offered, it counts as an year as it is guaranteed on the player's end
+            trueOfferYears = teamOffer.offerYears + 1
+        else:
+            trueOfferYears = teamOffer.offerYears
+
+        if (trueOfferYears == 1):
             yearInterest = 0
         else:
             # Tus is the GOAT and you can't tell me otherwise
             desiredYears = get_desired_years(self._age, self._ovr)
-            yearDifference = abs(desiredYears - teamOffer.offerYears)
+            yearDifference = abs(desiredYears - trueOfferYears)
 
             # This polynomial fit was created such that:
             # if yearDifference = 0, interest = 100

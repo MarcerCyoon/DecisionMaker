@@ -28,7 +28,7 @@ def updateExport(isResign, decisionArr):
 		player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == decision[0], export['players']))[0]
 		tid = teamDict[decision[1]]
 		player['tid'] = tid
-		player['contract']['amount'] = decision[2] * 1000
+		player['contract']['amount'] = float(decision[2]) * 1000
 
 		# If the current phase of the game is the "Regular Season" or the "Preseason",
 		# then signing a contract will include the current year.
@@ -36,10 +36,10 @@ def updateExport(isResign, decisionArr):
 		# However, if you sign Isaiah Thomas in a 1-year deal in the 2020 offseason, it will expire at
 		# the end of 2021. Thus, a distinction needs to be made depending on the current phase.
 		if (phase == "regular" or phase == "preseason"):
-			exp = decision[3] + currentYear - 1
+			exp = int(decision[3]) + currentYear - 1
 			player['contract']['exp'] = exp
 		else:
-			exp = decision[3] + currentYear
+			exp = int(decision[3]) + currentYear
 			player['contract']['exp'] = exp
 
 		# To fully emulate the way signings are worked in-game, we must also create a corresponding event
@@ -55,11 +55,11 @@ def updateExport(isResign, decisionArr):
 
 		if (not isResign):
 			event['type'] = 'reSigned'
-			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> re-signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % decision[2], exp)
+			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> re-signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % float(decision[2]), exp)
 
 		else:
 			event['type'] = 'freeAgent'
-			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % decision[2], exp)
+			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % float(decision[2]), exp)
 		
 		event['pids'] = [player['pid']]
 		event['tids'] = [tid]
@@ -239,16 +239,21 @@ def autocreate():
 
 		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception, Option
 		with open("offers.csv", "r") as offers:
-			len_reader = csv.reader(offers)
-			length = len(list(len_reader)) - 2
-
-			offers.seek(0)
 			reader = csv.reader(offers)
-			next(reader)
-			row = next(reader)
+			# Using an array as it's easier to use than the reader
+			csvData = []
+			for row in reader:
+				csvData.append(row)
 
-			while length > 0:
-				name = row[1].strip()
+			# Start at 1 since row 0 has headers
+			i = 0
+			print("Length: " + str(len(csvData)))
+
+			while i < len(csvData) - 1:
+				i += 1
+				print("Current i value: " + str(i))
+				print(csvData[i])
+				name = csvData[i][1].strip()
 
 				if (playerExists(name, export['players'])):
 					# This filters the entire list for the player we want (the one that has the same name.)
@@ -259,19 +264,22 @@ def autocreate():
 					break
 
 				offerList = []
-				offerList.append(row)
-				while True:
-					row = next(reader)
-					# We use our own iterator, 'length', as doing any sort of check on 'reader' causes things to break (forces it to iterate).
-					length -= 1
-					if (row[1].strip() == (player['firstName'].strip() + " " + player["lastName"].strip())):
-						offerList.append(row)
+				offerList.append(csvData[i])
 
-						if (length == 0):
+				while i < len(csvData) - 1:
+					i += 1
+					print("Current i value: " + str(i))
+					print(csvData[i])
+
+					if (csvData[i][1].strip() == (player["firstName"].strip() + " " + player["lastName"].strip())):
+						offerList.append(csvData[i])
+
+						if (i == len(csvData)):
 							break
 
 					else:
 						print("Those were all the offers!")
+						i -= 1
 						break
 
 				numContracts = len(offerList)
