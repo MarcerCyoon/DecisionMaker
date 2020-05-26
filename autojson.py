@@ -53,7 +53,7 @@ def updateExport(isResign, decisionArr):
 		code = list(filter(lambda team: team['tid'] == tid, export['teams']))[0]['abbrev']
 		labelName = list(filter(lambda team: team['tid'] == tid, export['teams']))[0]['name']
 
-		if (not isResign):
+		if int(isResign):
 			event['type'] = 'reSigned'
 			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> re-signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % float(decision[2]), exp)
 
