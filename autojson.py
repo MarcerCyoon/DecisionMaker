@@ -36,11 +36,21 @@ def updateExport(isResign, decisionArr):
 		# However, if you sign Isaiah Thomas in a 1-year deal in the 2020 offseason, it will expire at
 		# the end of 2021. Thus, a distinction needs to be made depending on the current phase.
 		if (phase == "regular" or phase == "preseason"):
-			exp = int(decision[3]) + currentYear - 1
-			player['contract']['exp'] = exp
+			firstYearOfContract = currentYear
+
 		else:
-			exp = int(decision[3]) + currentYear
-			player['contract']['exp'] = exp
+			firstYearOfContract = currentYear + 1
+
+		exp = int(decision[3]) + firstYearOfContract - 1
+		player['contract']['exp'] = exp
+
+		# Second, we must also correct every player's salary info and add the new contract amount
+		# such that their career earnings are updated.
+		for i in range(firstYearOfContract, exp + 1):
+			salaryInfo = dict()
+			salaryInfo['season'] = i
+			salaryInfo['amount'] = float(decision[2]) * 1000
+			player['salaries'].append(salaryInfo)
 
 		# To fully emulate the way signings are worked in-game, we must also create a corresponding event
 		# in the game's code that tells us that so-and-so signed with such-and-such team. This is important
