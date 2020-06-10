@@ -5,7 +5,7 @@ import random
 
 # Weighted sigmoid
 def get_moneyImportance(age, ovr):
-    rnd = random.uniform(-.1, .1)
+    rnd = random.uniform(-0.05, 0.05)
     return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
 
 # Year Importance was found by finding an exponential fit for [100, 0.4], [30, 0.1], [65, 0.3]
@@ -15,18 +15,18 @@ def get_yearImportance(ovr):
 
 # Weighted sigmoid
 def get_roleImportance(age, ovr):
-    rnd = random.uniform(-.1, .1)
+    rnd = random.uniform(-.05, .05)
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
 
 # Weighted sigmoid
 def get_ringImportance(age):
-    rnd = random.uniform(-.1, .1)
+    rnd = random.uniform(-.05, .05)
     return (.0192308 * age) - .146154 + rnd
 
 # I just made this up
 def get_facilityImportance():
     rnd = random.uniform(-.05, .05)
-    return 0.25 + rnd
+    return 0.20 + rnd
 
 # A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
 # We then convert the Gaussian Distribution into a value between [1, 5], so that's it's actually,
@@ -190,7 +190,7 @@ class Player:
         interest = int(sigma / (self._ringImportance + self._moneyImportance + self._yearImportance + self._roleImportance + self._facilityImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
-        fuzz = random.randint(-5, 5)
+        fuzz = random.randint(-2, 2)
 
         interest += fuzz
         

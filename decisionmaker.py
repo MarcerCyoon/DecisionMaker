@@ -133,7 +133,7 @@ def csvToDecisions(isResign, name):
 				else:
 					print("There were no valid offers for {}\n\n".format(player.name))
 
-	with open("decisionMatrix.csv", "w", newline='') as file:
+	with open("decisionMatrix.csv", "w", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file)
 
 		writer.writerow(["Name", "Signed With:", "AAV", "Years"])

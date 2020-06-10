@@ -3,19 +3,28 @@ import csv
 import math
 import collections
 
-# Global teamDict, @ me fools
-with open("export.json", "r", encoding='utf-8-sig') as file:
-		
-		# Generate dictionary of each team and their tids
-		teamDict = dict()
-		for team in json.load(file)['teams']:
-				teamName = team['region'] + " " + team['name']
-				teamDict[teamName] = team['tid']
+try:
+	# Global teamDict, @ me fools
+	with open("export.json", "r", encoding='utf-8-sig') as file:
+			
+			# Generate dictionary of each team and their tids
+			teamDict = dict()
+			for team in json.load(file)['teams']:
+					teamName = team['region'] + " " + team['name']
+					teamDict[teamName] = team['tid']
+except FileNotFoundError:
+	pass
 
 # Update an existing export named "export.json" with Free Agency decisions found in a decisionArr.
 # This should perfectly emulate actually signing them in the BBGM game.
 def updateExport(isResign, decisionArr):
 	print(decisionArr)
+
+	currentPlayers = []
+
+	for player in export['players']:
+		if (player['tid'] != -3 and player['tid'] != -2):
+			currentPlayers.append(player)
 
 	with open("export.json", "r", encoding='utf-8-sig') as file:
 	    export = json.load(file)
@@ -25,7 +34,7 @@ def updateExport(isResign, decisionArr):
 	phase = text.split(" ")[1]
 
 	for decision in decisionArr:
-		player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == decision[0], export['players']))[0]
+		player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == decision[0], currentPlayers))[0]
 		tid = teamDict[decision[1]]
 		player['tid'] = tid
 		player['contract']['amount'] = float(decision[2]) * 1000
@@ -81,6 +90,18 @@ def updateExport(isResign, decisionArr):
 
 		export['events'].append(event)
 
+		# We must also create a transaction dictionary for the player if it is not a re-signing.
+		if not int(isResign):
+			gamePhase = list(filter(lambda attribute: attribute['key'] == "phase", export['gameAttributes']))[0]['value']
+			transaction = {
+				"season": currentYear,
+				"phase": gamePhase,
+				"tid": tid,
+				"type": "freeAgent"
+			}
+
+			player['transactions'].append(transaction)
+
 	with open("updated.json", "w") as file:
 		json.dump(export, file)
 		print("New Export Created.")
@@ -120,14 +141,17 @@ def wasReleased(player, currentYear):
 # 1. Must be a first round pick
 # 2. Must be an expiring rookie (3 or 4 years in the league)
 def determineRFA(player, currentYear):
-	if (player['draft']['round'] != 1):
+	try:
+		if (player['draft']['round'] != 1):
+			return 0
+		elif (wasReleased(player, currentYear)):
+			return 0
+		elif (yearsActive(player, currentYear) != 3 or yearsActive(player, currentYear) != 4):
+			return 0
+		else:
+			return 1
+	except IndexError:
 		return 0
-	elif (wasReleased(player, currentYear)):
-		return 0
-	elif (yearsActive(player, currentYear) != 3 and yearsActive(player, currentYear) != 4):
-		return 0
-	else:
-		return 1
 
 # Formula taken straight out of BBGM code
 def calc_teamRating(players):
@@ -198,7 +222,7 @@ def create_teamLine(row, teamData, teamPower, writer):
 		isMLE = 0
 
 	offerYears = row[3]
-	facilitiesRank = teamData['budget']['facilities']['rank']
+	facilitiesRank = min(30, teamData['budget']['facilities']['rank'])
 
 	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
 	writer.writerow(line)
@@ -242,13 +266,19 @@ def autocreate():
 	# Resets CSV
 	open("generated.csv", "w").close()
 
-	with open("generated.csv", "a+", newline='') as file:
+	currentPlayers = []
+
+	for player in export['players']:
+		if (player['tid'] != -3 and player['tid'] != -2):
+			currentPlayers.append(player)
+
+	with open("generated.csv", "a+", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file, delimiter=",")
 		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
 		writer.writerow(start)
 
 		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception, Option
-		with open("offers.csv", "r") as offers:
+		with open("offers.csv", "r", encoding="utf-8-sig") as offers:
 			reader = csv.reader(offers)
 			# Using an array as it's easier to use than the reader
 			csvData = []
@@ -265,9 +295,9 @@ def autocreate():
 				print(csvData[i])
 				name = csvData[i][1].strip()
 
-				if (playerExists(name, export['players'])):
+				if (playerExists(name, currentPlayers)):
 					# This filters the entire list for the player we want (the one that has the same name.)
-					player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, export['players']))[0]
+					player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, currentPlayers))[0]
 
 				else:
 					print("{} does not exist!".format(name))
