@@ -15,17 +15,20 @@ def get_yearImportance(ovr):
 
 # Weighted sigmoid
 def get_roleImportance(age, ovr):
-    rnd = random.uniform(-.05, .05)
+    rnd = random.uniform(-0.05, 0.05)
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
 
 # Weighted sigmoid
 def get_ringImportance(age):
-    rnd = random.uniform(-.05, .05)
+    rnd = random.uniform(-0.05, 0.05)
     return (.0192308 * age) - .146154 + rnd
 
-# I just made this up
+# I just made this up, with the pretty reasonable assumption that
+# this importance should be the smallest importance, and that
+# everyone, regardless of age and ovr, prefer good facilities
+# pretty equally.
 def get_facilityImportance():
-    rnd = random.uniform(-.05, .05)
+    rnd = random.uniform(-0.05, 0.05)
     return 0.20 + rnd
 
 # A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
@@ -109,14 +112,13 @@ class Player:
         # Contract Interest calculation is a bit wonky.
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
-        stddev = self._askingAmount / 2
+        stddev = self._askingAmount / 3
         stddev2 = self._askingAmount / 5
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
         # the contract interest will be equal to a 100.
-        # On the other hand, the low offer is set to the askingAmount - half of the askingAmount. If you
+        # On the other hand, the low offer is set to the askingAmount - a third of the askingAmount. If you
         # offer the low, the contract interest will be equal to 0.
-        # If you go lower than the low it defaults to 0; if you go higher than the high it defaults to 100.
         low = self._askingAmount - stddev
         high = self._askingAmount + stddev2
 
@@ -191,7 +193,6 @@ class Player:
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-2, 2)
-
         interest += fuzz
         
         return interest

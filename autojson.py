@@ -3,21 +3,9 @@ import csv
 import math
 import collections
 
-try:
-	# Global teamDict, @ me fools
-	with open("export.json", "r", encoding='utf-8-sig') as file:
-			
-			# Generate dictionary of each team and their tids
-			teamDict = dict()
-			for team in json.load(file)['teams']:
-					teamName = team['region'] + " " + team['name']
-					teamDict[teamName] = team['tid']
-except FileNotFoundError:
-	pass
-
 # Update an existing export named "export.json" with Free Agency decisions found in a decisionArr.
 # This should perfectly emulate actually signing them in the BBGM game.
-def updateExport(isResign, decisionArr):
+def updateExport(isResign, decisionArr, export):
 	print(decisionArr)
 
 	currentPlayers = []
@@ -26,8 +14,11 @@ def updateExport(isResign, decisionArr):
 		if (player['tid'] != -3 and player['tid'] != -2):
 			currentPlayers.append(player)
 
-	with open("export.json", "r", encoding='utf-8-sig') as file:
-	    export = json.load(file)
+	# Generate dictionary of each team and their tids
+	teamDict = dict()
+	for team in export['teams']:
+		teamName = team['region'] + " " + team['name']
+		teamDict[teamName] = team['tid']
 
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
@@ -228,15 +219,20 @@ def create_teamLine(row, teamData, teamPower, writer):
 	writer.writerow(line)
 
 # Auto-create a working FA CSV.
-def autocreate():
-	with open("export.json", "r", encoding='utf-8-sig') as file:
-	    export = json.load(file)
-
+def autocreate(export):
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
 
 	# Generate array that contains each teams score, rating, payroll, and PR
 	powerArr = []
+
+			
+	# Generate dictionary of each team and their tids
+	teamDict = dict()
+	for team in export(file)['teams']:
+		teamName = team['region'] + " " + team['name']
+		teamDict[teamName] = team['tid']
+
 
 	for team in export['teams']:
 		tid = team['tid']
@@ -281,17 +277,16 @@ def autocreate():
 		with open("offers.csv", "r", encoding="utf-8-sig") as offers:
 			reader = csv.reader(offers)
 			# Using an array as it's easier to use than the reader
+			# The most notable advantage is being able to check/access values that have already been "read"
 			csvData = []
 			for row in reader:
 				csvData.append(row)
 
-			# Start at 1 since row 0 has headers
-			i = 0
-			print("Length: " + str(len(csvData)))
 
+			i = 0
 			while i < len(csvData) - 1:
+				# Start at 1 since row 0 has headers				
 				i += 1
-				print("Current i value: " + str(i))
 				print(csvData[i])
 				name = csvData[i][1].strip()
 
@@ -306,11 +301,15 @@ def autocreate():
 				offerList = []
 				offerList.append(csvData[i])
 
+				# We assume the CSV is sorted by player such that the same player's offers come in succession.
 				while i < len(csvData) - 1:
 					i += 1
-					print("Current i value: " + str(i))
 					print(csvData[i])
 
+					# We check if the name of the current row's player is the same as the player.
+					# If this is true, we add the row to one of the player's offers and then check if that was the last offer overall.
+					# If it is false, that must mean that the previous row was the last offer and we can move onto writing lines
+					# for this player and his offers.
 					if (csvData[i][1].strip() == (player["firstName"].strip() + " " + player["lastName"].strip())):
 						offerList.append(csvData[i])
 
@@ -319,6 +318,8 @@ def autocreate():
 
 					else:
 						print("Those were all the offers!")
+						# We also move back one here so that when we add right after the start of the while, we will end up
+						# with the same row.
 						i -= 1
 						break
 

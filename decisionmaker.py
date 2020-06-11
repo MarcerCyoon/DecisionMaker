@@ -149,14 +149,17 @@ def main():
 	open("list.txt", "w").close()
 
 	if int(auto) == 2:
-		autojson.autocreate()
+		with open("export.json", "r", encoding='utf-8-sig') as file:
+			export = json.load(file)
+
+		autojson.autocreate(export)
 		isResign = input("Is this concerning Re-signings? If yes, type 1. If not, type 0: ")
 		decisionArr = csvToDecisions(isResign, name="generated.csv")
 
 		update = input("Type 1 if you want to automate ALL above signings. If there are errors or priority conflicts, type 0 to not auto: ")
 
 		if int(update):
-			autojson.updateExport(isResign, decisionArr)
+			autojson.updateExport(isResign, decisionArr, export)
 
 	elif int(auto) == 1:
 		name = input("What is the name of the csv file? Include the .csv: ")
