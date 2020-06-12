@@ -3,6 +3,7 @@
 # Please note that the spreadsheet input is a bit finnicky.
 
 import csv
+import json
 from faclass import Player
 from faclass import teamOffer
 import decisions
