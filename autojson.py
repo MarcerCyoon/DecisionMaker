@@ -229,7 +229,7 @@ def autocreate(export):
 			
 	# Generate dictionary of each team and their tids
 	teamDict = dict()
-	for team in export(file)['teams']:
+	for team in export['teams']:
 		teamName = team['region'] + " " + team['name']
 		teamDict[teamName] = team['tid']
 
