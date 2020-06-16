@@ -4,8 +4,8 @@
 
 import csv
 import json
-from faclass import Player
-from faclass import teamOffer
+from .faclass import Player
+from .faclass import teamOffer
 import decisions
 import autojson
 import defaults
