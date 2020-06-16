@@ -2,6 +2,7 @@ import json
 import csv
 import math
 import collections
+import defaults
 
 # Update an existing export named "export.json" with Free Agency decisions found in a decisionArr.
 # This should perfectly emulate actually signing them in the BBGM game.
@@ -100,7 +101,7 @@ def updateExport(isResign, decisionArr, export):
 # Check to see if a player exists by trying to catch an IndexError
 def playerExists(name, players):
 	try:
-		check = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
+		list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
 	except IndexError:
 		return 0
 
@@ -223,16 +224,26 @@ def autocreate(export):
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
 
-	# Generate array that contains each teams score, rating, payroll, and PR
-	powerArr = []
+	# Set default values based on export's values
+	defaults.SOFT_CAP = list(filter(lambda attribute: attribute['key'] == "salaryCap", export['gameAttributes']))[0]['value'] / 1000
+	defaults.HARD_CAP = list(filter(lambda attribute: attribute['key'] == "luxuryPayroll", export['gameAttributes']))[0]['value'] / 1000
+	defaults.MAX_SALARY = list(filter(lambda attribute: attribute['key'] == "maxContract", export['gameAttributes']))[0]['value'] / 1000
+	defaults.MIN_SALARY = list(filter(lambda attribute: attribute['key'] == "minContract", export['gameAttributes']))[0]['value'] / 1000
 
-			
+	# Since there are only two caps held in the export, calculated the third cap (apron/luxury) with *math*
+	# This equation was found in the laziest, hackiest way possible:
+	# a linear fit to (33, 130) and (38, 156) since those are the corresponding x and y values for
+	# the Exodus League and NBA Chat League.
+	defaults.APRON_CAP = 5.2 * (defaults.HARD_CAP - defaults.SOFT_CAP) - 41.6
+
 	# Generate dictionary of each team and their tids
 	teamDict = dict()
 	for team in export['teams']:
 		teamName = team['region'] + " " + team['name']
 		teamDict[teamName] = team['tid']
 
+	# Generate array that contains each teams score, rating, payroll, and PR
+	powerArr = []
 
 	for team in export['teams']:
 		tid = team['tid']

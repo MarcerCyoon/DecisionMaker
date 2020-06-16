@@ -8,53 +8,54 @@ from faclass import Player
 from faclass import teamOffer
 import decisions
 import autojson
-
-MIN_SALARY = 0.9
-MAX_SALARY = 35.3
-SOFT_CAP = 109
-APRON_CAP = 130
-HARD_CAP = 142
+import defaults
 
 def calc_capSpace(payroll):
 	# This multiply-by-ten fix is done to avoid floating point errors. Basically, we multiple
 	# by ten to make them natural numbers, perform arithmetic, then divide the number by ten
 	# and return it as a decimal.
 	
-	fix = max(0, SOFT_CAP * 10 - payroll * 10)
+	fix = max(0, defaults.SOFT_CAP * 10 - payroll * 10)
 	return (fix / 10)
 
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
-    if payroll <= APRON_CAP:
+    if payroll <= defaults.APRON_CAP:
         return 9.5
-    elif payroll < HARD_CAP:
-        return min(5.5, HARD_CAP - payroll)
+    elif payroll < defaults.HARD_CAP:
+        return min(5.5, defaults.HARD_CAP - payroll)
     else:
         print("Team is hard capped!")
         return 0
 
 def check_hardCap(bid):
-	if bid.offerAmount + bid.capSpace <= HARD_CAP:
+	if bid.offerAmount + bid.capSpace <= defaults.HARD_CAP:
 		return True
 	else:
 		return False
 
 # Function that checks if an offer is valid with salary cap rules.
 def check_validity(player, bid, isResign, isMLE, payroll):
-    if bid.offerAmount > MAX_SALARY:
-        return 0
+	print(defaults.HARD_CAP)
+	if bid.offerAmount > defaults.MAX_SALARY:
+		return 0
 
-    if not check_hardCap(bid):
-        return 0
+	if not check_hardCap(bid):
+		return 0
 
-    if not isResign:
-        if bid.offerAmount <= bid.capSpace or bid.offerAmount == MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
-            return 1
-        else:
-            print("The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name))
-            return 0
-    else:
-        return 1
+	if not isResign:
+		if bid.offerAmount <= bid.capSpace or bid.offerAmount == defaults.MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
+			return 1
+		else:
+			violation = "The {} don't have enough cap space to sign {}.\n".format(bid.teamName, player.name)
+			print(violation)
+			
+			with open("list.txt", "a+") as file:
+				file.write(violation)
+			
+			return 0
+	else:
+		return 1
 
 # Boiler-plate code that uses the CSV to make decisions. Most of the credit for this code goes to Tus.
 def csvToDecisions(isResign, name):
@@ -220,7 +221,7 @@ def main():
 			for i in range(0, int(run)):
 				teamName = input("Input Team Name: ")
 				offer = input("Input Offer Amount (in millions): ")
-				year = input("Input Offer Years: ")
+				years = input("Input Offer Years: ")
 				option = input("Type TO for TO, PO for PO, and None for No Option: ")
 				power = input("Input Power Ranking: ")
 				facility = input("Input Facilities Rank: ")
