@@ -71,7 +71,7 @@ def updateExport(isResign, decisionArr, export):
 		else:
 			event['type'] = 'freeAgent'
 			event['text'] = "The <a href=\"/l/1/roster/{}/{}\">{}</a> signed <a href=\"/l/1/player/{}\">{}</a> for ${}M/year through {}.".format(code, currentYear, labelName, player['pid'], decision[0], "%0.2f" % float(decision[2]), exp)
-		
+
 		event['pids'] = [player['pid']]
 		event['tids'] = [tid]
 		event['season'] = currentYear
@@ -252,7 +252,7 @@ def autocreate(export):
 		    if(player['tid'] == tid):
 		        teamPlayers.append(player)
 
-		# Sort in terms of OVR       
+		# Sort in terms of OVR
 		teamPlayers = sorted(teamPlayers, key=lambda i:i['ratings'][-1]['ovr'], reverse=True)
 
 		# Get released players, as they count against the cap
@@ -265,7 +265,7 @@ def autocreate(export):
 		powerArr.append([name, score, rating, payroll, -1])
 
 	powerArr = sorted(powerArr, key=lambda i:i[1], reverse=True)
-	
+
 	for i in range(0, len(powerArr)):
 		# Doing min(i + 1, 30) because the PR value can only go from 1-30
 		powerArr[i][4] = min(i + 1, 30)
@@ -296,7 +296,7 @@ def autocreate(export):
 
 			i = 0
 			while i < len(csvData) - 1:
-				# Start at 1 since row 0 has headers				
+				# Start at 1 since row 0 has headers
 				i += 1
 				print(csvData[i])
 				name = csvData[i][1].strip()

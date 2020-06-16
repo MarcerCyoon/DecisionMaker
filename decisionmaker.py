@@ -2,6 +2,11 @@
 # All the input stuff is handled here.
 # Please note that the spreadsheet input is a bit finnicky.
 
+# If being used as a module, set sys.path correctly.
+if not __name__ == "__main__":
+	import sys
+	sys.path.append(os.getcwd() + "\\DecisionMaker")
+
 import csv
 import json
 from faclass import Player
@@ -14,7 +19,7 @@ def calc_capSpace(payroll):
 	# This multiply-by-ten fix is done to avoid floating point errors. Basically, we multiple
 	# by ten to make them natural numbers, perform arithmetic, then divide the number by ten
 	# and return it as a decimal.
-	
+
 	fix = max(0, defaults.SOFT_CAP * 10 - payroll * 10)
 	return (fix / 10)
 
@@ -49,10 +54,10 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 		else:
 			violation = "The {} don't have enough cap space to sign {}.\n".format(bid.teamName, player.name)
 			print(violation)
-			
+
 			with open("list.txt", "a+") as file:
 				file.write(violation)
-			
+
 			return 0
 	else:
 		return 1
@@ -71,7 +76,7 @@ def csvToDecisions(isResign, name):
 			if int(row[5]) == 1:
 				row = next(reader)
 				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
-				
+
 				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 					interest = player.returnInterest(bid)
 
@@ -229,7 +234,7 @@ def main():
 				role = input("Input Role of the player in the team (0-4): ")
 
 				bid = teamOffer(teamName, float(offer), int(power), calc_capSpace(float(capSpace)), int(role), int(years), int(facility), option)
-				
+
 				if int(check_validity(player, bid, 0, 1, capSpace)):
 					offers.append(bid)
 					interests.append(player.returnInterest(bid))
