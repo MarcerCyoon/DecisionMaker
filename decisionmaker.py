@@ -5,6 +5,7 @@
 # If being used as a module, set sys.path correctly.
 if not __name__ == "__main__":
 	import sys
+	import os
 	sys.path.append(os.getcwd() + "\\DecisionMaker")
 
 import csv
