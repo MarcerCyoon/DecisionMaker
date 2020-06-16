@@ -2,12 +2,6 @@
 # All the input stuff is handled here.
 # Please note that the spreadsheet input is a bit finnicky.
 
-# If being used as a module, set sys.path correctly.
-if not __name__ == "__main__":
-	import sys
-	import os
-	sys.path.append(os.getcwd() + "\\DecisionMaker")
-
 import csv
 import json
 from faclass import Player
@@ -53,7 +47,7 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 		if bid.offerAmount <= bid.capSpace or bid.offerAmount == defaults.MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
 			return 1
 		else:
-			violation = "The {} don't have enough cap space to sign {}.\n".format(bid.teamName, player.name)
+			violation = "The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name)
 			print(violation)
 
 			with open("list.txt", "a+") as file:
