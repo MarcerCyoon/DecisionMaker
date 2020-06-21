@@ -1,5 +1,6 @@
 import math
 import random
+import defaults
 
 # Subroutines – also makes things look nice and easy to find.
 
@@ -113,7 +114,11 @@ class Player:
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
         stddev = self._askingAmount / 3
-        stddev2 = self._askingAmount / 5
+
+        if (teamOffer.offerAmount == defaults.MAX_SALARY):
+            stddev2 = 0
+        else:
+            stddev2 = self._askingAmount / 5
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
         # the contract interest will be equal to a 100.
