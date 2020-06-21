@@ -92,7 +92,11 @@ def updateExport(isResign, decisionArr, export):
 				"type": "freeAgent"
 			}
 
-			player['transactions'].append(transaction)
+			try:
+				player['transactions'].append(transaction)
+			except KeyError:
+				player['transactions'] = []
+				player['transactions'].append(transaction)
 
 	with open("updated.json", "w") as file:
 		json.dump(export, file)
