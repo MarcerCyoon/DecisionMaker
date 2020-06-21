@@ -204,7 +204,7 @@ def create_playerLine(player, numContracts, currentYear, writer):
 	line = [name, age, ovr, askingAmount, isRFA, numContracts]
 	writer.writerow(line)
 
-def create_teamLine(row, teamData, teamPower, writer):
+def create_teamLine(row, teamData, teamPower, budgetActive, writer):
 	teamName = row[0].strip()
 	offerAmount = row[2]
 	powerRank = teamPower[4]
@@ -218,7 +218,12 @@ def create_teamLine(row, teamData, teamPower, writer):
 		isMLE = 0
 
 	offerYears = row[3]
-	facilitiesRank = min(30, teamData['budget']['facilities']['rank'])
+
+	if (budgetActive):
+		facilitiesRank = min(30, teamData['budget']['facilities']['rank'])
+	else:
+		# If budget is disabled, everyone's facilities rank is just 5.
+		facilitiesRank = 5
 
 	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
 	writer.writerow(line)
@@ -227,6 +232,9 @@ def create_teamLine(row, teamData, teamPower, writer):
 def autocreate(export):
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
+
+	# Get if budget is active or not
+	budgetActive = list(filter(lambda attribute: attribute['key'] == "budget", export['gameAttributes']))[0]['value']
 
 	# Set default values based on export's values
 	defaults.SOFT_CAP = list(filter(lambda attribute: attribute['key'] == "salaryCap", export['gameAttributes']))[0]['value'] / 1000
@@ -346,4 +354,4 @@ def autocreate(export):
 					teamData =  list(filter(lambda team: team['tid'] == teamDict[teamName], export['teams']))[0]
 					teamPower = find_by_inner_value(powerArr, teamName, 0)
 
-					create_teamLine(t_row, teamData, teamPower, writer)
+					create_teamLine(t_row, teamData, teamPower, budgetActive, writer)
