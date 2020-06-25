@@ -30,7 +30,7 @@ def get_ringImportance(age):
 # pretty equally.
 def get_facilityImportance():
     rnd = random.uniform(-0.05, 0.05)
-    return 0.20 + rnd
+    return 0.22 + rnd
 
 # A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
 # We then convert the Gaussian Distribution into a value between [1, 5], so that's it's actually,
@@ -113,7 +113,7 @@ class Player:
         # Contract Interest calculation is a bit wonky.
         # To accomodate for some of BBGM's fuzzing, we set our own maximum and minimum based off the amount
         # offered by BBGM.
-        stddev = self._askingAmount / 3
+        stddev = self._askingAmount / 4
 
         if (teamOffer.offerAmount == defaults.MAX_SALARY):
             stddev2 = 0
@@ -122,7 +122,7 @@ class Player:
 
         # The high offer is set to the askingAmount + a fifth of the askingAmount. If you offer the high,
         # the contract interest will be equal to a 100.
-        # On the other hand, the low offer is set to the askingAmount - a third of the askingAmount. If you
+        # On the other hand, the low offer is set to the askingAmount - a fourth of the askingAmount. If you
         # offer the low, the contract interest will be equal to 0.
         low = self._askingAmount - stddev
         high = self._askingAmount + stddev2
@@ -197,7 +197,7 @@ class Player:
         interest = int(sigma / (self._ringImportance + self._moneyImportance + self._yearImportance + self._roleImportance + self._facilityImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
-        fuzz = random.randint(-2, 2)
+        fuzz = random.randint(-3, 3)
         interest += fuzz
         
         return interest

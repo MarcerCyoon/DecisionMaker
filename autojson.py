@@ -164,12 +164,12 @@ def calc_teamRating(players):
 	return max(0, round(rawOVR))
 
 # Formula also taken straight out of BBGM code
-def calc_score(teamRating, team):
+def calc_score(teamRating, team, numGames):
 	gp = team['stats'][-1]['gp']
 
 	if (gp > 0):
 		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 10
-		score = (mov * gp) / 82
+		score = (mov * gp) / numGames
 	else:
 		score = 0
 
@@ -272,7 +272,8 @@ def autocreate(export):
 
 		name = team['region'] + " " + team['name']
 		rating = calc_teamRating(teamPlayers)
-		score = calc_score(rating, team)
+		numGames = list(filter(lambda attribute: attribute['key'] == 'numGames', export['gameAttributes']))[0]['value']
+		score = calc_score(rating, team, numGames)
 		payroll = addContracts(teamPlayers, releasedPlayers)
 		powerArr.append([name, score, rating, payroll, -1])
 
