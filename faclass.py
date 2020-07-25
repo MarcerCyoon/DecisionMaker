@@ -136,9 +136,9 @@ class Player:
 
         # Add Options modifier
         # Team Options subtract 5 interest, Player Options add 5 interest.
-        if (teamOffer.option == 1):
+        if (teamOffer.option == "TO"):
             contractInterest -= 5
-        elif (teamOffer.option == 2):
+        elif (teamOffer.option == "PO"):
             contractInterest += 5
         
         print("Contract Interest: {}".format(contractInterest))
@@ -226,12 +226,7 @@ class teamOffer:
         self._facility = facility
 
         # Whether it is a team, player, or no option
-        if (option == "TO"):
-            self._option = 1
-        elif (option == "PO"):
-            self._option = 2
-        else:
-            self._option = 0
+        self._option = option
         
     @property
     def teamName(self):
