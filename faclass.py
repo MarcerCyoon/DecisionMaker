@@ -199,6 +199,8 @@ class Player:
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-3, 3)
         interest += fuzz
+
+        print("Final Interest for {}: {}".format(teamOffer.teamName, interest))
         
         return interest
         
