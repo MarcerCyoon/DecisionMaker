@@ -31,12 +31,16 @@ def makeDecision(interests):
     percents = []
     
     for i in range(0, num):
-        tot += interests[i]
+        tot += max(0, interests[i])
 
     for i in range(0, num):
         percents.append((interests[i] / (tot)) * 100)
     
+    print(percents)
+    
     check = random.randint(1, 100)
+
+    print("Percents Roll: {}".format(check))
     
     if (check < percents[0]):
         return 0
