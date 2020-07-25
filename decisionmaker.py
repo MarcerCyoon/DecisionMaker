@@ -15,8 +15,8 @@ def calc_capSpace(payroll):
 	# by ten to make them natural numbers, perform arithmetic, then divide the number by ten
 	# and return it as a decimal.
 
-	fix = max(0, defaults.SOFT_CAP * 10 - payroll * 10)
-	return (fix / 10)
+	fix = max(0, int(defaults.SOFT_CAP * 100) - int(payroll * 100))
+	return (fix / 100)
 
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
@@ -83,7 +83,7 @@ def csvToDecisions(isResign, name):
 
 					if (resign):
 						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears, ("" if bid.offerYears == 1 else "s"))
-						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears])
+						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears, bid.option])
 
 					else:
 						result = "Final Decision: {} will not sign with the {}.\n\n".format(player.name, bid.teamName)
@@ -115,9 +115,10 @@ def csvToDecisions(isResign, name):
 							decisionTeam = offers[decisionAns].teamName
 							decisionAmount = offers[decisionAns].offerAmount
 							decisionYears = offers[decisionAns].offerYears
+							decisionOption = offers[decisionAns].option
 
 							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears, ("" if decisionYears == 1 else "s"))
-							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears])
+							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears, decisionOption])
 							print(result)
 
 							with open("list.txt", "a+") as file:
@@ -138,7 +139,7 @@ def csvToDecisions(isResign, name):
 	with open("decisionMatrix.csv", "w", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file)
 
-		writer.writerow(["Name", "Signed With:", "AAV", "Years"])
+		writer.writerow(["Name", "Signed With:", "AAV", "Years", "Option"])
 		for decision in decisionArr:
 			writer.writerow(decision)
 

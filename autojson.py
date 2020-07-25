@@ -168,7 +168,7 @@ def calc_score(teamRating, team, numGames):
 	gp = team['stats'][-1]['gp']
 
 	if (gp > 0):
-		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 10
+		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 1
 		score = (mov * gp) / numGames
 	else:
 		score = 0
