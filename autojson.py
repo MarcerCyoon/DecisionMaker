@@ -165,10 +165,11 @@ def calc_teamRating(players):
 
 # Formula also taken straight out of BBGM code
 def calc_score(teamRating, team, numGames):
-	gp = team['stats'][-1]['gp']
+	playoffs_index = (int(team['stats'][-1]['playoffs']) * -1) - 1
+	gp = team['stats'][playoffs_index]['gp']
 
 	if (gp > 0):
-		mov = round(((team['stats'][-1]['pts'] - team['stats'][-1]['oppPts']) / gp) * 10) / 1
+		mov = round(((team['stats'][playoffs_index]['pts'] - team['stats'][playoffs_index]['oppPts']) / gp) * 10) / 10
 		score = (mov * gp) / numGames
 	else:
 		score = 0
@@ -282,6 +283,8 @@ def autocreate(export):
 	for i in range(0, len(powerArr)):
 		# Doing min(i + 1, 30) because the PR value can only go from 1-30
 		powerArr[i][4] = min(i + 1, 30)
+
+	print(powerArr)
 
 	# Resets CSV
 	open("generated.csv", "w").close()

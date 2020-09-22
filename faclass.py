@@ -143,7 +143,7 @@ class Player:
         
         print("Contract Interest: {}".format(contractInterest))
 
-        if (teamOffer.option == 2):
+        if (teamOffer.option == "PO"):
             # If PO is offered, it counts as an year as it is guaranteed on the player's end
             trueOfferYears = teamOffer.offerYears + 1
         else:
