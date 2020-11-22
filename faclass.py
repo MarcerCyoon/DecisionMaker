@@ -167,14 +167,14 @@ class Player:
         print("Year Interest: {}".format(yearInterest))
 
         # Flip Power Ranking such that a better power ranking has a higher number; for example,
-        # if you are #1 in PR your powerScore should be 30.
-        powerScore = 31 - teamOffer.powerRank
+        # if you are #1 in PR your powerScore should be 36.
+        powerScore = 37 - teamOffer.powerRank
 
-        # Strength Interest is calculated as a function with an exponent a such that 30^a / 2 = 100.
-        # This graph grows slightly more exponentially than if 30^a = 100, which makes sense
+        # Strength Interest is calculated as a function with an exponent a such that 36^a / 3 = 100.
+        # This graph grows slightly more exponentially than if 36^a = 100, which makes sense
         # as really any NBA team that is bottom 15 is about equal, and there is a rapid increase
         # as we start to hit contenders.
-        strengthInterest = (powerScore ** 1.55778003215) / 2
+        strengthInterest = (powerScore ** 1.59167080532) / 3
         
         print("Strength Interest: {}".format(strengthInterest))
         
@@ -185,10 +185,10 @@ class Player:
         print("Role Interest: {}".format(roleInterest))
 
         # facilityScore rationale same as powerScore rationale.
-        facilityScore = 31 - teamOffer.facility
+        facilityScore = 37 - teamOffer.facility
 
-        # Facility Interest is calculated as a power function where the exponent is such that 30^a = 100. (shoutouts to Desmos)
-        facilityInterest = facilityScore ** 1.353984985
+        # Facility Interest is calculated as a power function where the exponent is such that 36^a = 100. (shoutouts to Desmos)
+        facilityInterest = facilityScore ** 1.28509720894
 
         print("Facility Interest: {}".format(facilityInterest))
         

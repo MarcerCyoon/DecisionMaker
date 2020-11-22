@@ -74,12 +74,7 @@ def csvToDecisions(isResign, name):
 
 				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
 					interest = player.returnInterest(bid)
-
-					if player.isrfa:
-						print("Player is RFA. Reducing interest.")
-						interest -= 15
-
-					resign = decisions.willSign(interest - 5)
+					resign = decisions.willSign(interest)
 
 					if (resign):
 						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears, ("" if bid.offerYears == 1 else "s"))
