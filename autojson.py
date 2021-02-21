@@ -249,8 +249,8 @@ def autocreate(export):
 	# Set default values based on export's values
 	defaults.SOFT_CAP = export['gameAttributes']['salaryCap'] / 1000
 	defaults.HARD_CAP = export['gameAttributes']['luxuryPayroll'] / 1000
-	defaults.MAX_SALARY = export['gameAttributes']['minContract'] / 1000
-	defaults.MIN_SALARY = export['gameAttributes']['maxContract'] / 1000
+	defaults.MAX_SALARY = export['gameAttributes']['maxContract'] / 1000
+	defaults.MIN_SALARY = export['gameAttributes']['minContract'] / 1000
 
 	# Since there are only two caps held in the export, calculated the third cap (apron/luxury) with *math*
 	# This equation was found in the laziest, hackiest way possible:
