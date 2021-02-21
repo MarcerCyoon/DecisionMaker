@@ -84,7 +84,7 @@ def updateExport(isResign, decisionArr, export):
 
 		# We must also create a transaction dictionary for the player if it is not a re-signing.
 		if not int(isResign):
-			gamePhase = list(filter(lambda attribute: attribute['key'] == "phase", export['gameAttributes']))[0]['value']
+			gamePhase = export['gameAttributes']['phase']
 			transaction = {
 				"season": currentYear,
 				"phase": gamePhase,
@@ -105,7 +105,7 @@ def updateExport(isResign, decisionArr, export):
 # Check to see if a player exists by trying to catch an IndexError
 def playerExists(name, players):
 	try:
-		list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, players))[0]
+		list(filter(lambda player: (get_player_name(player)) == name, players))[0]
 	except IndexError:
 		return 0
 
@@ -229,19 +229,28 @@ def create_teamLine(row, teamData, teamPower, budgetActive, writer):
 	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
 	writer.writerow(line)
 
+# Return player's name
+def get_player_name(player):
+	if len(player['firstName']) == 0:
+		return player['lastName'].strip()
+	elif len(player['lastName']) == 0:
+		return player['firstName'].strip()
+	else:
+		return player['firstName'].strip() + " " + player['lastName'].strip()
+
 # Auto-create a working FA CSV.
 def autocreate(export):
 	text = export['meta']['phaseText']
 	currentYear = int(text.split(" ")[0])
 
 	# Get if budget is active or not
-	budgetActive = list(filter(lambda attribute: attribute['key'] == "budget", export['gameAttributes']))[0]['value']
+	budgetActive = export['gameAttributes']['budget']
 
 	# Set default values based on export's values
-	defaults.SOFT_CAP = list(filter(lambda attribute: attribute['key'] == "salaryCap", export['gameAttributes']))[0]['value'] / 1000
-	defaults.HARD_CAP = list(filter(lambda attribute: attribute['key'] == "luxuryPayroll", export['gameAttributes']))[0]['value'] / 1000
-	defaults.MAX_SALARY = list(filter(lambda attribute: attribute['key'] == "maxContract", export['gameAttributes']))[0]['value'] / 1000
-	defaults.MIN_SALARY = list(filter(lambda attribute: attribute['key'] == "minContract", export['gameAttributes']))[0]['value'] / 1000
+	defaults.SOFT_CAP = export['gameAttributes']['salaryCap'] / 1000
+	defaults.HARD_CAP = export['gameAttributes']['luxuryPayroll'] / 1000
+	defaults.MAX_SALARY = export['gameAttributes']['minContract'] / 1000
+	defaults.MIN_SALARY = export['gameAttributes']['maxContract'] / 1000
 
 	# Since there are only two caps held in the export, calculated the third cap (apron/luxury) with *math*
 	# This equation was found in the laziest, hackiest way possible:
@@ -273,7 +282,7 @@ def autocreate(export):
 
 		name = team['region'] + " " + team['name']
 		rating = calc_teamRating(teamPlayers)
-		numGames = list(filter(lambda attribute: attribute['key'] == 'numGames', export['gameAttributes']))[0]['value']
+		numGames = export['gameAttributes']['numGames']
 		score = calc_score(rating, team, numGames)
 		payroll = addContracts(teamPlayers, releasedPlayers)
 		powerArr.append([name, score, rating, payroll, -1])
@@ -319,7 +328,7 @@ def autocreate(export):
 
 				if (playerExists(name, currentPlayers)):
 					# This filters the entire list for the player we want (the one that has the same name.)
-					player = list(filter(lambda player: (player['firstName'].strip() + " " + player['lastName'].strip()) == name, currentPlayers))[0]
+					player = list(filter(lambda player: get_player_name(player) == name, currentPlayers))[0]
 
 				else:
 					print("{} does not exist!".format(name))
@@ -337,7 +346,7 @@ def autocreate(export):
 					# If this is true, we add the row to one of the player's offers and then check if that was the last offer overall.
 					# If it is false, that must mean that the previous row was the last offer and we can move onto writing lines
 					# for this player and his offers.
-					if (csvData[i][1].strip() == (player["firstName"].strip() + " " + player["lastName"].strip())):
+					if (csvData[i][1].strip() == (get_player_name(player))):
 						offerList.append(csvData[i])
 
 						if (i == len(csvData)):

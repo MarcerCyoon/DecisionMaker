@@ -34,7 +34,10 @@ def makeDecision(interests):
         tot += max(0, interests[i])
 
     for i in range(0, num):
-        percents.append((interests[i] / (tot)) * 100)
+        if tot != 0:
+            percents.append((interests[i] / (tot)) * 100)
+        else:
+            percents.append(0)
     
     print(percents)
     
