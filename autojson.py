@@ -205,7 +205,7 @@ def create_playerLine(player, numContracts, currentYear, writer):
 	line = [name, age, ovr, askingAmount, isRFA, numContracts]
 	writer.writerow(line)
 
-def create_teamLine(row, teamData, teamPower, budgetActive, writer):
+def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
 	teamName = row[0].strip()
 	offerAmount = row[2]
 	powerRank = teamPower[4]
@@ -221,10 +221,10 @@ def create_teamLine(row, teamData, teamPower, budgetActive, writer):
 	offerYears = row[3]
 
 	if (budgetActive):
-		facilitiesRank = min(30, teamData['budget']['facilities']['rank'])
+		facilitiesRank = min(36, teamData['budget']['facilities']['rank'])
 	else:
-		# If budget is disabled, everyone's facilities rank is just 5.
-		facilitiesRank = 5
+		# If budget is disabled, everyone's facilities rank is just 4/5 of the number of teams.
+		facilitiesRank = min(36, int(4 / 5 * numTeams))
 
 	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
 	writer.writerow(line)
@@ -245,6 +245,9 @@ def autocreate(export):
 
 	# Get if budget is active or not
 	budgetActive = export['gameAttributes']['budget']
+
+	# Get num of teams
+	numTeams = len(export['teams'])
 
 	# Set default values based on export's values
 	defaults.SOFT_CAP = export['gameAttributes']['salaryCap'] / 1000
@@ -330,6 +333,10 @@ def autocreate(export):
 					# This filters the entire list for the player we want (the one that has the same name.)
 					player = list(filter(lambda player: get_player_name(player) == name, currentPlayers))[0]
 
+					if player['tid'] != -1:
+						print("{} is not a Free Agent!".format(name))
+						break
+
 				else:
 					print("{} does not exist!".format(name))
 					break
@@ -367,4 +374,4 @@ def autocreate(export):
 					teamData =  list(filter(lambda team: team['tid'] == teamDict[teamName], export['teams']))[0]
 					teamPower = find_by_inner_value(powerArr, teamName, 0)
 
-					create_teamLine(t_row, teamData, teamPower, budgetActive, writer)
+					create_teamLine(t_row, teamData, teamPower, budgetActive, numTeams, writer)
