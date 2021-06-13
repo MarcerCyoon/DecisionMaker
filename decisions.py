@@ -1,4 +1,5 @@
 import random
+import defaults
 
 def willSign(signInterest):
     # Sign algorithm is literally a d100 roll, compared to the final interest.
@@ -6,8 +7,8 @@ def willSign(signInterest):
 
     check = random.randint(1, 100)
 
-    print("d100: {}".format(check))
-    print("Final Interest: {}".format(signInterest))
+    defaults.log_output("d100: {}".format(check))
+    defaults.log_output("Final Interest: {}".format(signInterest))
     
     if (check <= signInterest):
         return True
@@ -39,11 +40,11 @@ def makeDecision(interests):
         else:
             percents.append(0)
     
-    print(percents)
+    defaults.log_output(percents)
     
     check = random.randint(1, 100)
 
-    print("Percents Roll: {}".format(check))
+    defaults.log_output("Percents Roll: {}".format(check))
     
     if (check < percents[0]):
         return 0

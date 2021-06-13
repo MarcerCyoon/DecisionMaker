@@ -65,11 +65,11 @@ def calcImportance(age, ovr):
     ringImportance = get_ringImportance(age)
     facilityImportance = get_facilityImportance()
     
-    print("Ring Importance: {}".format(ringImportance))
-    print("Role Importance: {}".format(roleImportance))
-    print("Money Importance: {}".format(moneyImportance))
-    print("Year Importance: {}".format(yearImportance))
-    print("Facility Importance: {}".format(facilityImportance))
+    defaults.log_output("Ring Importance: {}".format(ringImportance))
+    defaults.log_output("Role Importance: {}".format(roleImportance))
+    defaults.log_output("Money Importance: {}".format(moneyImportance))
+    defaults.log_output("Year Importance: {}".format(yearImportance))
+    defaults.log_output("Facility Importance: {}".format(facilityImportance))
 
     return (ringImportance, roleImportance, moneyImportance, yearImportance, facilityImportance)
 
@@ -141,7 +141,7 @@ class Player:
         elif (teamOffer.option == "PO"):
             contractInterest += 5
         
-        print("Contract Interest: {}".format(contractInterest))
+        defaults.log_output("Contract Interest: {}".format(contractInterest))
 
         if (teamOffer.option == "PO"):
             # If PO is offered, it counts as an year as it is guaranteed on the player's end
@@ -164,7 +164,7 @@ class Player:
             # if yearDifference = 4, interest = 0
             yearInterest = max(0, -5 * (yearDifference ** 2) - 15 * yearDifference + 100)
 
-        print("Year Interest: {}".format(yearInterest))
+        defaults.log_output("Year Interest: {}".format(yearInterest))
 
         # Flip Power Ranking such that a better power ranking has a higher number; for example,
         # if you are #1 in PR your powerScore should be 36.
@@ -176,13 +176,13 @@ class Player:
         # as we start to hit contenders.
         strengthInterest = (powerScore ** 1.59167080532) / 3
         
-        print("Strength Interest: {}".format(strengthInterest))
+        defaults.log_output("Strength Interest: {}".format(strengthInterest))
         
         # Role Interest is a linear function using the role value of the player. See details about that
         # in the constructor for teamOffer.
         roleInterest = 25 * teamOffer.role
         
-        print("Role Interest: {}".format(roleInterest))
+        defaults.log_output("Role Interest: {}".format(roleInterest))
 
         # facilityScore rationale same as powerScore rationale.
         facilityScore = 37 - teamOffer.facility
@@ -190,7 +190,7 @@ class Player:
         # Facility Interest is calculated as a power function where the exponent is such that 36^a = 100. (shoutouts to Desmos)
         facilityInterest = facilityScore ** 1.28509720894
 
-        print("Facility Interest: {}".format(facilityInterest))
+        defaults.log_output("Facility Interest: {}".format(facilityInterest))
         
         # Final interest is a weighted average of the three interests.
         sigma = (contractInterest * self._moneyImportance) + (yearInterest * self._yearImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance) + (facilityInterest * self._facilityImportance)
@@ -200,7 +200,7 @@ class Player:
         fuzz = random.randint(-3, 3)
         interest += fuzz
 
-        print("Final Interest for {}: {}".format(teamOffer.teamName, interest))
+        defaults.log_output("Final Interest for {}: {}".format(teamOffer.teamName, interest))
         
         return interest
         

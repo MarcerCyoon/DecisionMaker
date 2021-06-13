@@ -48,7 +48,8 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 			return 1
 		else:
 			violation = "The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name)
-			print(violation)
+
+			defaults.log_output(violation)
 
 			with open("list.txt", "a+") as file:
 				file.write(violation)
@@ -62,9 +63,13 @@ def csvToDecisions(isResign, name):
 	# Decision Array that stores all decision results. This will be returned so that the export can be updated.
 	decisionArr = []
 
+	# set logger file to file
+	defaults.LOGGER = open("logger.txt", "w")
+
 	with open(name) as file:
 		reader = csv.reader(file)
 		next(reader)
+
 		for row in reader:
 			player = Player(row[0], int(row[1]), int(row[2]), float(row[3]), int(row[4]))
 
@@ -83,7 +88,7 @@ def csvToDecisions(isResign, name):
 					else:
 						result = "Final Decision: {} will not sign with the {}.\n\n".format(player.name, bid.teamName)
 
-					print(result)
+					defaults.log_output(result)
 
 					# list.txt is a text file that holds all decisions only for easy access
 					with open("list.txt", "a+") as file:
@@ -104,7 +109,7 @@ def csvToDecisions(isResign, name):
 				if offers:
 					for i in range(0, numCheck):
 						decisionAns = decisions.makeDecision(interests)
-						print("Choice: {}; time to check".format(offers[decisionAns].teamName))
+						defaults.log_output("Choice: {}; time to check".format(offers[decisionAns].teamName))
 
 						if (decisions.willSign(interests[decisionAns])):
 							decisionTeam = offers[decisionAns].teamName
@@ -114,7 +119,7 @@ def csvToDecisions(isResign, name):
 
 							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears, ("" if decisionYears == 1 else "s"))
 							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears, decisionOption])
-							print(result)
+							defaults.log_output(result)
 
 							with open("list.txt", "a+") as file:
 								file.write(result)
@@ -123,13 +128,13 @@ def csvToDecisions(isResign, name):
 
 						if (i == numCheck - 1):
 							result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.\n\n".format(player.name)
-							print(result)
+							defaults.log_output(result)
 
 							with open("list.txt", "a+") as file:
 								file.write(result)
 
 				else:
-					print("There were no valid offers for {}\n\n".format(player.name))
+					defaults.log_output("There were no valid offers for {}\n\n".format(player.name))
 
 	with open("decisionMatrix.csv", "w", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file)
@@ -137,6 +142,8 @@ def csvToDecisions(isResign, name):
 		writer.writerow(["Name", "Signed With:", "AAV", "Years", "Option"])
 		for decision in decisionArr:
 			writer.writerow(decision)
+
+	defaults.LOGGER.close()
 
 	return decisionArr
 
