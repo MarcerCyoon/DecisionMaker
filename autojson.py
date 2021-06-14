@@ -240,8 +240,7 @@ def get_player_name(player):
 
 # Auto-create a working FA CSV.
 def autocreate(export):
-	text = export['meta']['phaseText']
-	currentYear = int(text.split(" ")[0])
+	currentYear = export['gameAttributes']['season']
 
 	# Get if budget is active or not
 	budgetActive = export['gameAttributes']['budget']
