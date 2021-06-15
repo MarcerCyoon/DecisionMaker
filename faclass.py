@@ -74,7 +74,7 @@ def calcImportance(age, ovr):
     return (ringImportance, roleImportance, moneyImportance, yearImportance, facilityImportance)
 
 class Player:
-    def __init__(self, name, age, ovr, askingAmount, isrfa):
+    def __init__(self, name, age, ovr, askingAmount, isrfa, birdRights):
         self._name = name
         self._age = age
 
@@ -86,6 +86,11 @@ class Player:
         
         # Whether the player is an RFA or not
         self._isrfa = isrfa
+
+        if birdRights.lower() == "none":
+            self._birdRights = None
+        else:
+            self._birdRights = birdRights
 
         self._ringImportance, self._roleImportance, self._moneyImportance, self._yearImportance, self._facilityImportance = calcImportance(self._age, self._ovr)
     
@@ -108,6 +113,11 @@ class Player:
     @property
     def isrfa(self):
         return self._isrfa
+
+    @property
+    def birdRights(self):
+        return self._birdRights
+    
     
     def returnInterest(self, teamOffer):
         # Contract Interest calculation is a bit wonky.

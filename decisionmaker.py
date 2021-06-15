@@ -44,6 +44,9 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 		return 0
 
 	if not isResign:
+		if player.birdRights == bid.teamName:
+			return 1
+
 		if bid.offerAmount <= bid.capSpace or bid.offerAmount == defaults.MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
 			return 1
 		else:
@@ -71,9 +74,9 @@ def csvToDecisions(isResign, name):
 		next(reader)
 
 		for row in reader:
-			player = Player(row[0], int(row[1]), int(row[2]), float(row[3]), int(row[4]))
+			player = Player(row[0], int(row[1]), int(row[2]), float(row[3]), int(row[4]), row[5])
 
-			if int(row[5]) == 1:
+			if int(row[6]) == 1:
 				row = next(reader)
 				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
 
@@ -97,7 +100,7 @@ def csvToDecisions(isResign, name):
 			else:
 				offers = []
 				interests = []
-				for i in range(int(row[5])):
+				for i in range(int(row[6])):
 					row = next(reader)
 					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
 
@@ -182,8 +185,9 @@ def main():
 		ovr = input("Input overall in BBGM: ")
 		ask = input("Input asking amount (in millions): ")
 		isrfa = input("If this player is a UFA, type 0. If this player is an RFA, type 1: ")
+		birdrights = input("Input the name of the team that holds bird rights for this player. If None, type None: ")
 
-		player = Player(name, int(age), int(ovr), float(ask), int(isrfa))
+		player = Player(name, int(age), int(ovr), float(ask), int(isrfa), birdrights)
 
 		situation = input("If you are evaluating a re-sign situation or a situation where a player has one offer, type 1. If this is an Open FA situation, type 2: ")
 

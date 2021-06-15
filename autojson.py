@@ -195,14 +195,83 @@ def addContracts(players, releasedPlayers):
 
 	return total / 1000
 
-def create_playerLine(player, numContracts, currentYear, writer):
+def actual_year(transaction):
+    # If a player is drafted, they don't technically
+    # sign their contract until the next year.
+    if transaction['type'] == 'draft':
+        return transaction['season'] + 1
+
+    return (transaction['season'] + 1) if transaction['phase'] >= 7 else transaction['season']
+    
+# Return the name of the team who owns the player's
+# bird rights. If no team has birds, return None.
+def get_bird_rights_team(player, events, currentYear, teams):
+    #print("Current player: {}".format(get_player_name(player)))
+    # First, check if player was last released. Released players
+    # cannot have birds.
+    # Filter out all non-player events and filter for events with specified player.
+    player_events = list(filter(lambda event: event['type'] not in ['playoffs', 'madePlayoffs', 'newTeam', 'draftLottery', 'teamExpansion'] and player['pid'] in event['pids'], events))
+
+    if player_events[-1]['type'] == 'release':
+    	return None
+
+    # Clock starts at 1, increment
+    # an amount equal to the years elapsed
+    bird_rights_clock = 1
+    has_bird_rights = False
+    transactions = player['transactions']
+
+    for i in range(1, len(transactions)):
+        #print(transactions[i]['season'], transactions[i]['type'])
+        bird_rights_clock += actual_year(transactions[i]) - actual_year(transactions[i - 1])
+
+        if bird_rights_clock >= 3:
+            #print("Obtained bird rights! {}".format(bird_rights_clock))
+            has_bird_rights = True
+            
+        if transactions[i]['tid'] != transactions[i - 1]['tid']:
+            #print("Changed teams; clock is reset!")
+            bird_rights_clock = 1
+
+            if (transactions[i]['type'] == 'freeAgent'):
+                #print("Signed with a new team in FA; birds are lost!")
+                has_bird_rights = False
+                
+        else:
+            # If teams are same, check salaries to make sure
+            # there aren't any years where they were just... chilling in FA
+            # TODO: There has to be a better way to do this, since I'm already accessing player events
+            # and the data has to be stored there. Current thought is: check for transactions[i-1] eid, filter
+            # for that event, and retrieve end season and compare?
+            amount = len(list(filter(lambda salary: salary['season'] >= actual_year(transactions[i-1]) and salary['season'] <= actual_year(transactions[i]), player['salaries'])))
+            diff = (actual_year(transactions[i]) - actual_year(transactions[i - 1])) + 1 - amount
+            bird_rights_clock -= max(0, diff)
+            #print(amount)
+        #print("Clock is now at {}!".format(bird_rights_clock))
+            
+    else:
+        bird_rights_clock += currentYear - actual_year(transactions[-1])
+        #print("Clock is now at {}!".format(bird_rights_clock))
+        
+        if bird_rights_clock >= 3:
+            #print("Obtained bird rights!")
+            has_bird_rights = True
+
+    if has_bird_rights:
+        team = list(filter(lambda team: team['tid'] == transactions[-1]['tid'], teams))[0]
+        return team['region'] + " " + team['name']
+    else:
+        return None
+
+def create_playerLine(player, numContracts, currentYear, events, teams, writer):
 	name = player['firstName'].strip() + " " + player['lastName'].strip()
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
 	isRFA = determineRFA(player, currentYear)
+	bird_rights = get_bird_rights_team(player, events, currentYear, teams)
 
-	line = [name, age, ovr, askingAmount, isRFA, numContracts]
+	line = [name, age, ovr, askingAmount, isRFA, str(bird_rights), numContracts]
 	writer.writerow(line)
 
 def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
@@ -308,7 +377,7 @@ def autocreate(export):
 
 	with open("generated.csv", "a+", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file, delimiter=",")
-		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "# of Contracts/Use MLE (0 or 1)", "null spot/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
+		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "Bird Rights/Use MLE (0 or 1)", "# of Contracts/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
 		writer.writerow(start)
 
 		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception, Option
@@ -319,7 +388,6 @@ def autocreate(export):
 			csvData = []
 			for row in reader:
 				csvData.append(row)
-
 
 			i = 0
 			while i < len(csvData) - 1:
@@ -366,7 +434,7 @@ def autocreate(export):
 						break
 
 				numContracts = len(offerList)
-				create_playerLine(player, numContracts, currentYear, writer)
+				create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], writer)
 
 				for t_row in offerList:
 					teamName = t_row[0].strip()
