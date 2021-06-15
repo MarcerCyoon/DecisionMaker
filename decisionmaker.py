@@ -25,7 +25,6 @@ def MLE_amount(payroll):
     elif payroll < defaults.HARD_CAP:
         return min(5.5, defaults.HARD_CAP - payroll)
     else:
-        print("Team is hard capped!")
         return 0
 
 def check_hardCap(bid):
@@ -37,7 +36,7 @@ def check_hardCap(bid):
 # Function that checks if an offer is valid with salary cap rules.
 def check_validity(player, bid, isResign, isMLE, payroll):
 	print(defaults.HARD_CAP)
-	if bid.offerAmount > defaults.MAX_SALARY:
+	if bid.offerAmount > defaults.MAX_SALARY or bid.offerAmount < defaults.MIN_SALARY:
 		return 0
 
 	if not check_hardCap(bid):
