@@ -96,6 +96,9 @@ def csvToDecisions(isResign, name):
 					with open("list.txt", "a+") as file:
 						file.write(result)
 
+				else:
+					defaults.log_output("There were no valid offers for {}.\n\n".format(player.name))
+
 			else:
 				offers = []
 				interests = []
@@ -136,7 +139,7 @@ def csvToDecisions(isResign, name):
 								file.write(result)
 
 				else:
-					defaults.log_output("There were no valid offers for {}\n\n".format(player.name))
+					defaults.log_output("There were no valid offers for {}.\n\n".format(player.name))
 
 	with open("decisionMatrix.csv", "w", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file)
