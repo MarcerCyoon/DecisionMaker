@@ -276,7 +276,7 @@ def create_playerLine(player, numContracts, currentYear, events, teams, writer):
 
 def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
 	teamName = row[0].strip()
-	offerAmount = row[2]
+	offerAmount = row[2].replace("$", "").replace("M", "")
 	powerRank = teamPower[4]
 	payroll = teamPower[3]
 
