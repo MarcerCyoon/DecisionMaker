@@ -184,7 +184,7 @@ def calc_score(teamRating, team, numGames):
 	return score
 
 # Add up all the contracts of a team to find its payroll
-def addContracts(players, releasedPlayers):
+def add_contracts(players, releasedPlayers):
 	total = 0
 
 	for player in players:
@@ -349,13 +349,16 @@ def autocreate(export):
 		teamPlayers = sorted(teamPlayers, key=lambda i:i['ratings'][-1]['ovr'], reverse=True)
 
 		# Get released players, as they count against the cap
-		releasedPlayers = list(filter(lambda release: release['tid'] == tid, export['releasedPlayers']))
+		if 'releasedPlayers' in export.keys():
+			releasedPlayers = list(filter(lambda release: release['tid'] == tid, export['releasedPlayers']))
+		else:
+			releasedPlayers = []
 
 		name = team['region'] + " " + team['name']
 		rating = calc_teamRating(teamPlayers)
 		numGames = export['gameAttributes']['numGames']
 		score = calc_score(rating, team, numGames)
-		payroll = addContracts(teamPlayers, releasedPlayers)
+		payroll = add_contracts(teamPlayers, releasedPlayers)
 		powerArr.append([name, score, rating, payroll, -1])
 
 	powerArr = sorted(powerArr, key=lambda i:i[1], reverse=True)
