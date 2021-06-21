@@ -165,13 +165,18 @@ def calc_teamRating(players):
 
 # Formula also taken straight out of BBGM code
 def calc_score(teamRating, team, numGames):
-	playoffs_index = (int(team['stats'][-1]['playoffs']) * -1) - 1
-	gp = team['stats'][playoffs_index]['gp']
+	try:
+		playoffs_index = (int(team['stats'][-1]['playoffs']) * -1) - 1
+		gp = team['stats'][playoffs_index]['gp']
 
-	if (gp > 0):
-		mov = round(((team['stats'][playoffs_index]['pts'] - team['stats'][playoffs_index]['oppPts']) / gp) * 10) / 10
-		score = (mov * gp) / numGames
-	else:
+		if (gp > 0):
+			mov = round(((team['stats'][playoffs_index]['pts'] - team['stats'][playoffs_index]['oppPts']) / gp) * 10) / 10
+			score = (mov * gp) / numGames
+		else:
+			score = 0
+	except KeyError:
+		# A KeyError means team stats don't exist. There is probably
+		# no team playing data. Just use PR.
 		score = 0
 
 	estimated_mov = teamRating * 0.6 - 30
