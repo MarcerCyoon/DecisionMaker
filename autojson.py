@@ -279,7 +279,14 @@ def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
 	offerAmount = row[2]
 	powerRank = teamPower[4]
 	payroll = teamPower[3]
-	role = row[4]
+
+	try:
+		int(row[4])
+	except ValueError:
+		role = row[4][0]
+	else:
+		role = row[4]
+
 	option = row[6]
 
 	if (row[5] == "Mid-Level Exception (MLE)"):
