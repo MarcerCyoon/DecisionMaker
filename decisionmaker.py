@@ -21,9 +21,9 @@ def calc_capSpace(payroll):
 # What follows is a bunch of subroutines for check_validity.
 def MLE_amount(payroll):
     if payroll <= defaults.APRON_CAP:
-        return 9.5
+        return defaults.NONTAX_MLE
     elif payroll < defaults.HARD_CAP:
-        return min(5.5, defaults.HARD_CAP - payroll)
+        return min(defaults.TAX_MLE, defaults.HARD_CAP - payroll)
     else:
         return 0
 
@@ -35,7 +35,12 @@ def check_hardCap(bid):
 
 # Function that checks if an offer is valid with salary cap rules.
 def check_validity(player, bid, isResign, payroll):
+	# TODO: Get rid of payroll here lol we can just use cap space
 	print(defaults.HARD_CAP)
+
+	if defaults.IGNORE_CAP_RULES:
+		return 1
+
 	if bid.offerAmount > defaults.MAX_SALARY or bid.offerAmount < defaults.MIN_SALARY:
 		violation = "The {} offered an invalid contract value to {}.\n\n".format(bid.teamName, player.name)
 		defaults.log_output(violation)
@@ -49,13 +54,13 @@ def check_validity(player, bid, isResign, payroll):
 		return 0
 
 	if not isResign:
-		if bid.exception == "Bird Rights":
+		if bid.exception == "Bird Rights" and defaults.USE_BIRDS:
 			return 1
 
-		elif "VET MIN" in bid.exception.upper():
+		elif "VET MIN" in bid.exception.upper() and defaults.USE_VET_MIN:
 			return 1
 
-		elif "MLE" in bid.exception.upper() and bid.offerAmount <= MLE_amount(payroll):
+		elif "MLE" in bid.exception.upper() and bid.offerAmount <= MLE_amount(payroll) and defaults.USE_MLE:
 			return 1
 
 		elif bid.offerAmount <= bid.capSpace:
@@ -122,7 +127,7 @@ def csvToDecisions(isResign, name):
 						offers.append(bid)
 						interests.append(player.returnInterest(bid))
 
-				numCheck = min(3, len(offers))
+				numCheck = min(3, len(offers)) if defaults.RANDOMNESS else 1
 				if offers:
 					for i in range(0, numCheck):
 						decisionAns = decisions.makeDecision(interests)
@@ -144,12 +149,12 @@ def csvToDecisions(isResign, name):
 
 							break
 
-						if (i == numCheck - 1):
-							result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.\n\n".format(player.name)
-							defaults.log_output(result)
+					else:
+						result = "Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.\n\n".format(player.name)
+						defaults.log_output(result)
 
-							with open("list.txt", "a+") as file:
-								file.write(result)
+						with open("list.txt", "a+") as file:
+							file.write(result)
 
 				else:
 					defaults.log_output("There were no valid offers for {}.\n\n".format(player.name))
@@ -221,11 +226,6 @@ def main():
 
 			if int(check_validity(player, bid, isResign, 1, capSpace)):
 				interest = player.returnInterest(bid)
-
-				if (player.isrfa):
-					print("Player is RFA. Reducing interest.")
-					interest -= 15
-
 				resign = decisions.willSign(interest - 5)
 
 				if (resign):
@@ -256,8 +256,7 @@ def main():
 					offers.append(bid)
 					interests.append(player.returnInterest(bid))
 
-			numCheck = min(3, len(offers))
-
+			numCheck = min(3, len(offers)) if defaults.RANDOMNESS else 1
 			if offers:
 				for i in range(0, numCheck):
 					decisionAns = decisions.makeDecision(interests)
@@ -268,8 +267,8 @@ def main():
 						print("Final Decision: {} will sign with the {}\n\n".format(player.name, decisionTeam))
 						break
 
-					if (i == numCheck - 1):
-						print("Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name))
+				else:
+					print("Final Decision: {} is unsatisfied with their current offers and will not sign with any teams.".format(player.name))
 
 			else:
 				print("There were no valid offers for {}\n\n".format(player.name))

@@ -2,11 +2,25 @@
 # The defaults are based on the Exodus League's
 # defaults.
 
-MIN_SALARY = 0.9
-MAX_SALARY = 35.3
-SOFT_CAP = 109.0
-APRON_CAP = 130.0
-HARD_CAP = 142.0
+import configparser
+
+config = configparser.ConfigParser()
+config.read('SETTINGS.INI')
+
+MIN_SALARY = config.getfloat("DEFAULT", "MinSalary")
+MAX_SALARY = config.getfloat("DEFAULT", "MaxSalary")
+SOFT_CAP = config.getfloat("DEFAULT", "SoftCap")
+APRON_CAP = config.getfloat("DEFAULT", "ApronCap")
+HARD_CAP = config.getfloat("DEFAULT", "HardCap")
+NONTAX_MLE = config.getfloat("EXCEPTION", "NonTaxMLE")
+TAX_MLE = config.getfloat("EXCEPTION", "TaxMLE")
+
+IGNORE_CAP_RULES = config.getboolean("EXCEPTION", "IgnoreAll")
+USE_MLE = config.getboolean("EXCEPTION", "MLE")
+USE_BIRDS = config.getboolean("EXCEPTION", "BirdRights")
+USE_VET_MIN = config.getboolean("EXCEPTION", "VetMin")
+
+RANDOMNESS = not config.getboolean("RANDOMNESS", "RemoveRandomness")
 
 # Logger Default Value
 LOGGER = None

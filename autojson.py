@@ -1,5 +1,6 @@
 import json
 import csv
+import configparser
 import math
 import collections
 import defaults
@@ -183,7 +184,6 @@ def calc_score(teamRating, team, numGames):
 	score += estimated_mov
 
 	last_ten = collections.Counter(team['seasons'][-1]['lastTen'])[1]
-
 	score += -10 + (2 * last_ten)
 
 	return score
@@ -210,7 +210,7 @@ def actual_year(transaction):
     
 # Return the name of the team who owns the player's
 # bird rights. If no team has birds, return None.
-def get_bird_rights_team(player, events, currentYear, teams):
+def get_bird_rights_team(player, events, currentYear, teams, threshold=3):
     #print("Current player: {}".format(get_player_name(player)))
     # First, check if player was last released. Released players
     # cannot have birds.
@@ -233,7 +233,7 @@ def get_bird_rights_team(player, events, currentYear, teams):
         #print(transactions[i]['season'], transactions[i]['type'])
         bird_rights_clock += actual_year(transactions[i]) - actual_year(transactions[i - 1])
 
-        if bird_rights_clock >= 3:
+        if bird_rights_clock >= threshold:
             #print("Obtained bird rights! {}".format(bird_rights_clock))
             has_bird_rights = True
             
@@ -261,7 +261,7 @@ def get_bird_rights_team(player, events, currentYear, teams):
         bird_rights_clock += currentYear - actual_year(transactions[-1])
         #print("Clock is now at {}!".format(bird_rights_clock))
         
-        if bird_rights_clock >= 3:
+        if bird_rights_clock >= threshold:
             #print("Obtained bird rights!")
             has_bird_rights = True
 
@@ -271,13 +271,13 @@ def get_bird_rights_team(player, events, currentYear, teams):
     else:
         return None
 
-def create_playerLine(player, numContracts, currentYear, events, teams, writer):
+def create_playerLine(player, numContracts, currentYear, events, teams, threshold, writer):
 	name = player['firstName'].strip() + " " + player['lastName'].strip()
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
 	isRFA = determineRFA(player, currentYear)
-	bird_rights = get_bird_rights_team(player, events, currentYear, teams)
+	bird_rights = get_bird_rights_team(player, events, currentYear, teams, threshold=threshold)
 
 	line = [name, age, ovr, askingAmount, isRFA, str(bird_rights), numContracts]
 	writer.writerow(line)
@@ -302,7 +302,7 @@ def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, bird_right
 	if row[5] == "None":
 		if bird_rights == teamName:
 			exception = "Bird Rights"
-		if offerAmount == str(defaults.MIN_SALARY):
+		elif offerAmount == str(defaults.MIN_SALARY):
 			exception = "Vet Min"
 		else:
 			exception = "None"
@@ -341,17 +341,22 @@ def autocreate(export):
 	# Get num of teams
 	numTeams = len(export['teams'])
 
-	# Set default values based on export's values
-	defaults.SOFT_CAP = export['gameAttributes']['salaryCap'] / 1000
-	defaults.HARD_CAP = export['gameAttributes']['luxuryPayroll'] / 1000
-	defaults.MAX_SALARY = export['gameAttributes']['maxContract'] / 1000
-	defaults.MIN_SALARY = export['gameAttributes']['minContract'] / 1000
+	config = configparser.ConfigParser()
+	config.read('SETTINGS.INI')
 
-	# Since there are only two caps held in the export, calculated the third cap (apron/luxury) with *math*
-	# This equation was found in the laziest, hackiest way possible:
-	# a linear fit to (33, 130) and (38, 156) since those are the corresponding x and y values for
-	# the Exodus League and NBA Chat League.
-	defaults.APRON_CAP = 5.2 * (defaults.HARD_CAP - defaults.SOFT_CAP) - 41.6
+	if config.getboolean('DEFAULT', 'RetrieveFromExport'):
+		# Set default values based on export's values
+		defaults.SOFT_CAP = export['gameAttributes']['salaryCap'] / 1000
+		defaults.HARD_CAP = export['gameAttributes']['luxuryPayroll'] / 1000
+		defaults.MAX_SALARY = export['gameAttributes']['maxContract'] / 1000
+		defaults.MIN_SALARY = export['gameAttributes']['minContract'] / 1000
+
+	if config.getboolean('DEFAULT', 'ApproximateApron'):
+		# Since there are only two caps held in the export, calculated the third cap (apron/luxury) with *math*
+		# This equation was found in the laziest, hackiest way possible:
+		# a linear fit to (33, 130) and (38, 156) since those are the corresponding x and y values for
+		# the Exodus League and NBA Chat League.
+		defaults.APRON_CAP = 5.2 * (defaults.HARD_CAP - defaults.SOFT_CAP) - 41.6
 
 	# Generate dictionary of each team and their tids
 	teamDict = dict()
@@ -461,7 +466,10 @@ def autocreate(export):
 						break
 
 				numContracts = len(offerList)
-				player_line = create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], writer)
+
+				threshold = config.getint('EXCEPTION', 'BirdRightsThreshold')
+
+				player_line = create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], threshold, writer)
 
 				for t_row in offerList:
 					teamName = t_row[0].strip()

@@ -6,22 +6,22 @@ import defaults
 
 # Weighted sigmoid
 def get_moneyImportance(age, ovr):
-    rnd = random.uniform(-0.05, 0.05)
+    rnd = random.uniform(-0.05, 0.05) if defaults.RANDOMNESS else 0
     return (.3 + rnd) * (1/(1+math.exp(.13343*(age - 31)))) + (.7 - rnd) * (1/(1+math.exp(-.08673*(ovr - 55))))
 
 # Year Importance was found by finding an exponential fit for [100, 0.4], [30, 0.1], [65, 0.3]
 def get_yearImportance(ovr):
-    rnd = random.uniform(-0.05, 0.05)
+    rnd = random.uniform(-0.05, 0.05) if defaults.RANDOMNESS else 0
     return rnd + .0928289 * math.exp(.0149981 * ovr)
 
 # Weighted sigmoid
 def get_roleImportance(age, ovr):
-    rnd = random.uniform(-0.05, 0.05)
+    rnd = random.uniform(-0.05, 0.05) if defaults.RANDOMNESS else 0
     return (.7 + rnd) * (.5 / (1 + math.exp(-.05545 * (ovr - 55)))) + (.3 - rnd) * ((-3/1690)*(age**2) + (93/845)*age - (2207/1690))
 
 # Weighted sigmoid
 def get_ringImportance(age):
-    rnd = random.uniform(-0.05, 0.05)
+    rnd = random.uniform(-0.05, 0.05) if defaults.RANDOMNESS else 0
     return (.0192308 * age) - .146154 + rnd
 
 # I just made this up, with the pretty reasonable assumption that
@@ -29,7 +29,7 @@ def get_ringImportance(age):
 # everyone, regardless of age and ovr, prefer good facilities
 # pretty equally.
 def get_facilityImportance():
-    rnd = random.uniform(-0.05, 0.05)
+    rnd = random.uniform(-0.05, 0.05) if defaults.RANDOMNESS else 0
     return 0.22 + rnd
 
 # A 3D Gaussian Distribution that is used to figure out the desired year(s) of a player.
@@ -207,7 +207,7 @@ class Player:
         interest = int(sigma / (self._ringImportance + self._moneyImportance + self._yearImportance + self._roleImportance + self._facilityImportance))
 
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
-        fuzz = random.randint(-3, 3)
+        fuzz = random.randint(-3, 3) if defaults.RANDOMNESS else 0
         interest += fuzz
 
         defaults.log_output("Final Interest for {}: {}".format(teamOffer.teamName, interest))
