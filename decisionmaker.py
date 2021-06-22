@@ -34,7 +34,7 @@ def check_hardCap(bid):
 		return False
 
 # Function that checks if an offer is valid with salary cap rules.
-def check_validity(player, bid, isResign, isMLE, payroll):
+def check_validity(player, bid, isResign, payroll):
 	print(defaults.HARD_CAP)
 	if bid.offerAmount > defaults.MAX_SALARY or bid.offerAmount < defaults.MIN_SALARY:
 		return 0
@@ -43,14 +43,20 @@ def check_validity(player, bid, isResign, isMLE, payroll):
 		return 0
 
 	if not isResign:
-		if player.birdRights == bid.teamName:
+		if bid.exception == "Bird Rights":
 			return 1
 
-		if bid.offerAmount <= bid.capSpace or bid.offerAmount == defaults.MIN_SALARY or (isMLE == 1 and bid.offerAmount <= MLE_amount(payroll)):
+		elif "VET MIN" in bid.exception.upper():
 			return 1
+
+		elif "MLE" in bid.exception.upper() and bid.offerAmount <= MLE_amount(payroll):
+			return 1
+
+		elif bid.offerAmount <= bid.capSpace:
+			return 1
+
 		else:
 			violation = "The {} don't have enough cap space to sign {}.\n\n".format(bid.teamName, player.name)
-
 			defaults.log_output(violation)
 
 			with open("list.txt", "a+") as file:
@@ -77,15 +83,15 @@ def csvToDecisions(isResign, name):
 
 			if int(row[6]) == 1:
 				row = next(reader)
-				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
+				bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), row[5], int(row[6]), int(row[7]), row[8])
 
-				if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
+				if int(check_validity(player, bid, int(isResign), float(row[3]))):
 					interest = player.returnInterest(bid)
 					resign = decisions.willSign(interest)
 
 					if (resign):
 						result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, bid.teamName, "%0.2f" % bid.offerAmount, bid.offerYears, ("" if bid.offerYears == 1 else "s"))
-						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears, bid.option])
+						decisionArr.append([player.name, bid.teamName, bid.offerAmount, bid.offerYears, bid.option, bid.exception])
 
 					else:
 						result = "Final Decision: {} will not sign with the {}.\n\n".format(player.name, bid.teamName)
@@ -104,9 +110,9 @@ def csvToDecisions(isResign, name):
 				interests = []
 				for i in range(int(row[6])):
 					row = next(reader)
-					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), int(row[6]), int(row[7]), row[8])
+					bid = teamOffer(row[0], float(row[1]), int(row[2]), calc_capSpace(float(row[3])), int(row[4]), row[5], int(row[6]), int(row[7]), row[8])
 
-					if int(check_validity(player, bid, int(isResign), int(row[5]), float(row[3]))):
+					if int(check_validity(player, bid, int(isResign), float(row[3]))):
 						offers.append(bid)
 						interests.append(player.returnInterest(bid))
 
@@ -121,9 +127,10 @@ def csvToDecisions(isResign, name):
 							decisionAmount = offers[decisionAns].offerAmount
 							decisionYears = offers[decisionAns].offerYears
 							decisionOption = offers[decisionAns].option
+							decisionException = offers[decisionAns].exception
 
 							result = "Final Decision: {} will sign with the {} on a ${}M contract for {} year{}.\n\n".format(player.name, decisionTeam, "%0.2f" % decisionAmount, decisionYears, ("" if decisionYears == 1 else "s"))
-							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears, decisionOption])
+							decisionArr.append([player.name, decisionTeam, decisionAmount, decisionYears, decisionOption, decisionException])
 							defaults.log_output(result)
 
 							with open("list.txt", "a+") as file:
@@ -144,7 +151,7 @@ def csvToDecisions(isResign, name):
 	with open("decisionMatrix.csv", "w", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file)
 
-		writer.writerow(["Name", "Signed With:", "AAV", "Years", "Option"])
+		writer.writerow(["Name", "Signed With:", "AAV", "Years", "Option", "Exception"])
 		for decision in decisionArr:
 			writer.writerow(decision)
 

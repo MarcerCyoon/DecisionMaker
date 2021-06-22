@@ -282,7 +282,9 @@ def create_playerLine(player, numContracts, currentYear, events, teams, writer):
 	line = [name, age, ovr, askingAmount, isRFA, str(bird_rights), numContracts]
 	writer.writerow(line)
 
-def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
+	return line
+
+def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, bird_rights, writer):
 	teamName = row[0].strip()
 	offerAmount = row[2].replace("$", "").replace("M", "")
 	powerRank = teamPower[4]
@@ -297,10 +299,15 @@ def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
 
 	option = row[6]
 
-	if (row[5] == "Mid-Level Exception (MLE)"):
-		isMLE = 1
+	if row[5] == "None":
+		if bird_rights == teamName:
+			exception = "Bird Rights"
+		if offerAmount == str(defaults.MIN_SALARY):
+			exception = "Vet Min"
+		else:
+			exception = "None"
 	else:
-		isMLE = 0
+		exception = row[5]
 
 	offerYears = row[3]
 
@@ -310,8 +317,10 @@ def create_teamLine(row, teamData, teamPower, budgetActive, numTeams, writer):
 		# If budget is disabled, everyone's facilities rank is just 4/5 of the number of teams.
 		facilitiesRank = min(36, int(4 / 5 * numTeams))
 
-	line = [teamName, offerAmount, powerRank, payroll, role, isMLE, offerYears, facilitiesRank, option]
+	line = [teamName, offerAmount, powerRank, payroll, role, exception, offerYears, facilitiesRank, option]
 	writer.writerow(line)
+
+	return line
 
 # Return player's name
 def get_player_name(player):
@@ -395,7 +404,7 @@ def autocreate(export):
 
 	with open("generated.csv", "a+", newline='', encoding="utf-8-sig") as file:
 		writer = csv.writer(file, delimiter=",")
-		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "Bird Rights/Use MLE (0 or 1)", "# of Contracts/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
+		start = ["Name/Team", "Age/Offer", "OVR/Power Ranking", "Asking Amount/Team Payroll", "isRFA (0 or 1)/Player Role", "Bird Rights/Exception", "# of Contracts/Offer Years", "null spot/Facilities Rank", "null spot/Option Type"]
 		writer.writerow(start)
 
 		# Columns for offers.csv: Team Name, Player Being Offered, Offer Amount, Offer Years, Role, Exception, Option
@@ -452,11 +461,13 @@ def autocreate(export):
 						break
 
 				numContracts = len(offerList)
-				create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], writer)
+				player_line = create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], writer)
 
 				for t_row in offerList:
 					teamName = t_row[0].strip()
 					teamData =  list(filter(lambda team: team['tid'] == teamDict[teamName], export['teams']))[0]
 					teamPower = find_by_inner_value(powerArr, teamName, 0)
 
-					create_teamLine(t_row, teamData, teamPower, budgetActive, numTeams, writer)
+					# Check if the current offer is from a team who just released the player.
+					#if (player_events[-1]['type'] == 'release' and teamDict[teamName] in player_events[-1]['tids'] and player_events[-1]['season'] == currentYear):
+					create_teamLine(t_row, teamData, teamPower, budgetActive, numTeams, player_line[5], writer)
