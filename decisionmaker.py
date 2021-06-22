@@ -37,6 +37,12 @@ def check_hardCap(bid):
 def check_validity(player, bid, isResign, payroll):
 	print(defaults.HARD_CAP)
 	if bid.offerAmount > defaults.MAX_SALARY or bid.offerAmount < defaults.MIN_SALARY:
+		violation = "The {} offered an invalid contract value to {}.\n\n".format(bid.teamName, player.name)
+		defaults.log_output(violation)
+
+		with open("list.txt", "a+") as file:
+			file.write(violation)
+
 		return 0
 
 	if not check_hardCap(bid):
