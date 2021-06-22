@@ -1,7 +1,7 @@
 # DecisionMaker
 A decision-making algorithm for the Exodus League, a BBGM NBA simulation league.
 
-Currently, this algorithm is on version 5.0.1.
+Currently, this algorithm is on version 6.0.0.
 
 To run the program, download all the files in a folder then run
 "decisionmaker.py", the main file for the algorithm.
@@ -11,6 +11,12 @@ Gaussian distribution fit. Couldn't have done it without you!
 
 This is an open-source repository licensed under the GNU GPLv3 License. The License
 is included in the repository.
+
+### Fully Customizable!
+For a long time, DecisionMaker was Exodus-centric; however, with the introduction of
+`SETTINGS.INI`, you can customize DecisionMaker's functionality to your league's benefit.
+Open the file in any text editor and edit the values to whatever you desire to make an
+algo that fits your needs.
 
 ### Now Fully Automated
 DecisionMaker can now pull data **directly from an export**, process your offers,
@@ -24,8 +30,8 @@ The columns should be Team Name, Player Being Offered, Offer Amount, Offer Years
 in that order. Note: for Option, the choices should be exactly "TO", "PO", and "None".
 
 If you want to see what outputs/decisions the program has made, check out `generated.csv` for the
-generated input csv, `list.txt` for all decisions in plain text, and `decisionMatrix.csv` for
-decisions in a CSV format (compatible with Ainge-BBGM).
+generated input csv, `list.txt` for all decisions in plain text, `loggers.txt` for all relevant logs
+kept in plain text, and `decisionMatrix.csv` for decisions in a CSV format (compatible with Ainge-BBGM).
 
 ### How to Use the Spreadsheet Functions of DecisionMaker:
 When running Free Agency, there may be a multitude of offers you need to run through the algorithm.
