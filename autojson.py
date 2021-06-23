@@ -466,10 +466,7 @@ def autocreate(export):
 						break
 
 				numContracts = len(offerList)
-
-				threshold = config.getint('EXCEPTION', 'BirdRightsThreshold')
-
-				player_line = create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], threshold, writer)
+				player_line = create_playerLine(player, numContracts, currentYear, export['events'], export['teams'], defaults.BIRDS_THRESHOLD, writer)
 
 				for t_row in offerList:
 					teamName = t_row[0].strip()

@@ -19,6 +19,7 @@ IGNORE_CAP_RULES = config.getboolean("EXCEPTION", "IgnoreAll")
 USE_MLE = config.getboolean("EXCEPTION", "MLE")
 USE_BIRDS = config.getboolean("EXCEPTION", "BirdRights")
 USE_VET_MIN = config.getboolean("EXCEPTION", "VetMin")
+BIRDS_THRESHOLD = config.getint('EXCEPTION', 'BirdRightsThreshold')
 
 RANDOMNESS = not config.getboolean("RANDOMNESS", "RemoveRandomness")
 
