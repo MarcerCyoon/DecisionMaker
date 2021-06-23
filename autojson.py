@@ -272,7 +272,7 @@ def get_bird_rights_team(player, events, currentYear, teams, threshold=3):
         return None
 
 def create_playerLine(player, numContracts, currentYear, events, teams, threshold, writer):
-	name = player['firstName'].strip() + " " + player['lastName'].strip()
+	name = get_player_name(player)
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
@@ -334,7 +334,7 @@ def get_player_name(player):
 # Set globals based on export values.
 def set_globals(export, file='SETTINGS.INI'):
 	config = configparser.ConfigParser()
-	config.read('SETTINGS.INI')
+	config.read(file)
 
 	if config.getboolean('DEFAULT', 'RetrieveFromExport'):
 		# Set default values based on export's values
