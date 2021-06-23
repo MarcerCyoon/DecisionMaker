@@ -331,16 +331,8 @@ def get_player_name(player):
 	else:
 		return player['firstName'].strip() + " " + player['lastName'].strip()
 
-# Auto-create a working FA CSV.
-def autocreate(export):
-	currentYear = export['gameAttributes']['season']
-
-	# Get if budget is active or not
-	budgetActive = export['gameAttributes']['budget']
-
-	# Get num of teams
-	numTeams = len(export['teams'])
-
+# Set globals based on export values.
+def set_globals(export, file='SETTINGS.INI'):
 	config = configparser.ConfigParser()
 	config.read('SETTINGS.INI')
 
@@ -357,6 +349,20 @@ def autocreate(export):
 		# a linear fit to (33, 130) and (38, 156) since those are the corresponding x and y values for
 		# the Exodus League and NBA Chat League.
 		defaults.APRON_CAP = 5.2 * (defaults.HARD_CAP - defaults.SOFT_CAP) - 41.6
+
+	return {'SOFT_CAP': defaults.SOFT_CAP, 'APRON_CAP': defaults.APRON_CAP, 'HARD_CAP': defaults.HARD_CAP, 'MAX_SALARY': defaults.MAX_SALARY, 'MIN_SALARY': defaults.MIN_SALARY}
+
+# Auto-create a working FA CSV.
+def autocreate(export):
+	currentYear = export['gameAttributes']['season']
+
+	# Get if budget is active or not
+	budgetActive = export['gameAttributes']['budget']
+
+	# Get num of teams
+	numTeams = len(export['teams'])
+
+	set_globals(export)
 
 	# Generate dictionary of each team and their tids
 	teamDict = dict()
