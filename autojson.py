@@ -270,7 +270,7 @@ def create_playerLine(player, numContracts, currentYear, events, teams, threshol
 	age = currentYear - int(player['born']['year'])
 	ovr = player['ratings'][-1]['ovr']
 	askingAmount = player['contract']['amount'] / 1000
-	isRFA = determineRFA(player, currentYear)
+	isRFA = determineRFA(player)
 	bird_rights = get_bird_rights_team(player, events, currentYear, teams, threshold=threshold)
 
 	line = [name, age, ovr, askingAmount, isRFA, str(bird_rights), numContracts]
