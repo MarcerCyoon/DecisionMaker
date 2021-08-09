@@ -176,8 +176,8 @@ def calc_score(teamRating, team, numGames):
 	try:
 		last_ten = collections.Counter(team['seasons'][-1]['lastTen'])[1]
 		score += -10 + (2 * last_ten)
-		
-	except keyError:
+
+	except KeyError:
 		pass
 
 	return score
