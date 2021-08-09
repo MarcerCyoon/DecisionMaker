@@ -137,18 +137,8 @@ def wasReleased(player, currentYear):
 # Rules for RFA in Exodus:
 # 1. Must be a first round pick
 # 2. Must be an expiring rookie (3 or 4 years in the league)
-def determineRFA(player, currentYear):
-	try:
-		if (player['draft']['round'] != 1):
-			return 0
-		elif (wasReleased(player, currentYear)):
-			return 0
-		elif (yearsActive(player, currentYear) != 3 or yearsActive(player, currentYear) != 4):
-			return 0
-		else:
-			return 1
-	except IndexError:
-		return 0
+def determineRFA(player):
+	return int(player['watch'])
 
 # Formula taken straight out of BBGM code
 def calc_teamRating(players):
@@ -183,8 +173,12 @@ def calc_score(teamRating, team, numGames):
 	estimated_mov = teamRating * 0.6 - 30
 	score += estimated_mov
 
-	last_ten = collections.Counter(team['seasons'][-1]['lastTen'])[1]
-	score += -10 + (2 * last_ten)
+	try:
+		last_ten = collections.Counter(team['seasons'][-1]['lastTen'])[1]
+		score += -10 + (2 * last_ten)
+		
+	except keyError:
+		pass
 
 	return score
 
@@ -215,7 +209,7 @@ def get_bird_rights_team(player, events, currentYear, teams, threshold=3):
     # First, check if player was last released. Released players
     # cannot have birds.
     # Filter out all non-player events and filter for events with specified player.
-    player_events = list(filter(lambda event: event['type'] not in ['newLeague', 'playoffs', 'madePlayoffs', 'newTeam', 'draftLottery', 'teamExpansion', 'gameAttribute', 'teamRelocation'] and player['pid'] in event['pids'], events))
+    player_events = list(filter(lambda event: event['type'] not in ['newLeague', 'playoffs', 'madePlayoffs', 'newTeam', 'draftLottery', 'teamExpansion', 'gameAttribute', 'teamRelocation', 'teamContraction'] and player['pid'] in event['pids'], events))
 
     if len(player_events) == 0:
     	return None

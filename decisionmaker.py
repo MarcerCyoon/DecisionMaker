@@ -275,5 +275,33 @@ def main():
 
 	input("Press ENTER to exit")
 
+
+def set_defaults(file='SETTINGS.INI'):
+	"""
+	Set the default values for the algorithm.
+	"""
+	import configparser
+	import defaults
+	config = configparser.ConfigParser()
+	config.read(file)
+
+	defaults.MIN_SALARY = config.getfloat("DEFAULT", "MinSalary")
+	defaults.MAX_SALARY = config.getfloat("DEFAULT", "MaxSalary")
+	defaults.SOFT_CAP = config.getfloat("DEFAULT", "SoftCap")
+	defaults.APRON_CAP = config.getfloat("DEFAULT", "ApronCap")
+	defaults.HARD_CAP = config.getfloat("DEFAULT", "HardCap")
+	defaults.NONTAX_MLE = config.getfloat("EXCEPTION", "NonTaxMLE")
+	defaults.TAX_MLE = config.getfloat("EXCEPTION", "TaxMLE")
+
+	defaults.IGNORE_CAP_RULES = config.getboolean("EXCEPTION", "IgnoreAll")
+	defaults.USE_MLE = config.getboolean("EXCEPTION", "MLE")
+	defaults.USE_BIRDS = config.getboolean("EXCEPTION", "BirdRights")
+	defaults.USE_VET_MIN = config.getboolean("EXCEPTION", "VetMin")
+	defaults.BIRDS_THRESHOLD = config.getint('EXCEPTION', 'BirdRightsThreshold')
+
+	defaults.RANDOMNESS = not config.getboolean("RANDOMNESS", "RemoveRandomness")
+
 if __name__ == "__main__":
+	set_defaults()
+	print(defaults.MAX_SALARY)
 	main()
