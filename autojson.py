@@ -1,3 +1,4 @@
+import os
 import json
 import csv
 import configparser
@@ -356,7 +357,9 @@ def autocreate(export):
 	# Get num of teams
 	numTeams = len(export['teams'])
 
-	set_globals(export)
+	path = os.path.dirname(os.path.realpath(__file__))
+	path += '\SETTINGS.INI'
+	set_globals(export, file=path)
 
 	# Generate dictionary of each team and their tids
 	teamDict = dict()

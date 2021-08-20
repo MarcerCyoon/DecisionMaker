@@ -3,9 +3,12 @@
 # defaults.
 
 import configparser
+import os
 
+path = os.path.dirname(os.path.realpath(__file__))
+path += '\SETTINGS.INI'
 config = configparser.ConfigParser()
-config.read('SETTINGS.INI')
+config.read(path)
 
 MIN_SALARY = config.getfloat("DEFAULT", "MinSalary")
 MAX_SALARY = config.getfloat("DEFAULT", "MaxSalary")
