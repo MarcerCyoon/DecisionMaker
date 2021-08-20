@@ -6,7 +6,7 @@ import configparser
 import os
 
 path = os.path.dirname(os.path.realpath(__file__))
-path += '\SETTINGS.INI'
+path += '/SETTINGS.INI'
 config = configparser.ConfigParser()
 config.read(path)
 

@@ -359,7 +359,7 @@ def autocreate(export):
 	numTeams = len(export['teams'])
 
 	path = os.path.dirname(os.path.realpath(__file__))
-	path += '\SETTINGS.INI'
+	path += '/SETTINGS.INI'
 	set_globals(export, file=path)
 
 	# Generate dictionary of each team and their tids
