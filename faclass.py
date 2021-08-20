@@ -206,6 +206,9 @@ class Player:
         sigma = (contractInterest * self._moneyImportance) + (yearInterest * self._yearImportance) + (strengthInterest * self._ringImportance) + (roleInterest * self._roleImportance) + (facilityInterest * self._facilityImportance)
         interest = int(sigma / (self._ringImportance + self._moneyImportance + self._yearImportance + self._roleImportance + self._facilityImportance))
 
+        if bool(self._isrfa):
+            interest *= 1.15
+
         # Fuzz adds a bit of "fuzz" to the interest so that there are no guarantees, ever.
         fuzz = random.randint(-3, 3) if defaults.RANDOMNESS else 0
         interest += fuzz
