@@ -330,7 +330,7 @@ def get_player_name(player):
 		return player['firstName'].strip() + " " + player['lastName'].strip()
 
 # Set globals based on export values.
-def set_globals(export, file='SETTINGS.INI'):
+def set_globals(export, file='/SETTINGS.INI'):
 	path = os.path.dirname(os.path.realpath(__file__))
 	path += file
 	config = configparser.ConfigParser()
@@ -362,9 +362,7 @@ def autocreate(export):
 	# Get num of teams
 	numTeams = len(export['teams'])
 
-	path = os.path.dirname(os.path.realpath(__file__))
-	path += '/SETTINGS.INI'
-	set_globals(export, file=path)
+	set_globals(export)
 
 	# Generate dictionary of each team and their tids
 	teamDict = dict()
