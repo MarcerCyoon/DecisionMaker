@@ -226,12 +226,15 @@ def get_bird_rights_team(player, events, currentYear, teams, threshold=3):
 
     for i in range(1, len(transactions)):
         #print(transactions[i]['season'], transactions[i]['type'])
-        bird_rights_clock += actual_year(transactions[i]) - actual_year(transactions[i - 1])
+        try:
+        	bird_rights_clock += actual_year(transaction=transactions[i]) - actual_year(transaction=transactions[i - 1])
+        except KeyError:
+        	continue
 
         if bird_rights_clock >= threshold:
             #print("Obtained bird rights! {}".format(bird_rights_clock))
             has_bird_rights = True
-            
+
         if transactions[i]['tid'] != transactions[i - 1]['tid']:
             #print("Changed teams; clock is reset!")
             bird_rights_clock = 1
@@ -328,8 +331,10 @@ def get_player_name(player):
 
 # Set globals based on export values.
 def set_globals(export, file='SETTINGS.INI'):
+	path = os.path.dirname(os.path.realpath(__file__))
+	path += file
 	config = configparser.ConfigParser()
-	config.read(file)
+	config.read(path)
 
 	if config.getboolean('DEFAULT', 'RetrieveFromExport'):
 		# Set default values based on export's values
