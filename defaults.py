@@ -39,4 +39,5 @@ def log_output(string):
 		LOGGER.write(str(string) + "\n")
 
 	else:
-		raise Exception("LOGGER value is not set.")
+		print(string)
+		#raise Exception("LOGGER value is not set.")

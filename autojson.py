@@ -210,7 +210,7 @@ def get_bird_rights_team(player, events, currentYear, teams, threshold=3):
     # First, check if player was last released. Released players
     # cannot have birds.
     # Filter out all non-player events and filter for events with specified player.
-    player_events = list(filter(lambda event: event['type'] not in ['newLeague', 'playoffs', 'madePlayoffs', 'newTeam', 'draftLottery', 'teamExpansion', 'gameAttribute', 'teamRelocation', 'teamContraction', 'teamLogo'] and player['pid'] in event['pids'], events))
+    player_events = list(filter(lambda event: event['type'] not in ['newLeague', 'playoffs', 'madePlayoffs', 'newTeam', 'draftLottery', 'teamExpansion', 'gameAttribute', 'teamRelocation', 'teamContraction', 'teamLogo', 'luxuryTax', 'luxuryTaxDist', 'minPayroll'] and player['pid'] in event['pids'], events))
 
     if len(player_events) == 0:
     	return None
