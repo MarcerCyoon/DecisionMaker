@@ -57,9 +57,10 @@ def check_validity(player, bid, isResign, payroll):
 		if bid.exception == "Bird Rights" and defaults.USE_BIRDS:
 			return 1
 
-		elif "VET MIN" in bid.exception.upper() and defaults.USE_VET_MIN:
+		elif ("VET MIN" in bid.exception.upper() or defaults.MIN_SALARY == bid.offerAmount) and defaults.USE_VET_MIN:
 			return 1
 
+		# TODO: Add MLE validity check with cap space here
 		elif "MLE" in bid.exception.upper() and bid.offerAmount <= MLE_amount(payroll) and defaults.USE_MLE:
 			return 1
 
