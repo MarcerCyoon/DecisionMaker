@@ -139,7 +139,10 @@ def wasReleased(player, currentYear):
 # 1. Must be a first round pick
 # 2. Must be an expiring rookie (3 or 4 years in the league)
 def determineRFA(player):
-	return int(player['watch'])
+	try:
+		return int(player['watch'])
+	except Exception:
+		return 0
 
 # Formula taken straight out of BBGM code
 def calc_teamRating(players):
